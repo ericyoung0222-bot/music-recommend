@@ -18,6 +18,8 @@
 7. [팀원 안내 (CSS 담당)](#팀원-안내-css-담당)
 8. [주의: 공개되는 키](#주의-공개되는-키)
 9. [문제 해결](#문제-해결)
+10. [사용한 오픈소스·외부 서비스](#사용한-오픈소스외부-서비스)
+11. [라이선스](#라이선스)
 
 ## 기술 구성
 
@@ -212,3 +214,21 @@ tracks/{trackKey}/ratings/{uid}      { score, updatedAt }
 | 카카오톡에서 연 링크로 로그인이 안 됨 | 구글 정책상 앱 안 브라우저에서는 로그인이 막힙니다. 화면 안내대로 Chrome/Safari로 여세요. |
 | 저장할 때 "권한이 없어요" | `firestore.rules`를 게시했는지, 로그인했는지 확인하세요. |
 | 국내 곡 추천 결과가 적음 | Last.fm에 정보가 적은 곡입니다. 비슷한 가수의 인기곡으로 자동 보충되며, 영어 표기 제목으로 검색하면 더 잘 찾습니다. |
+
+## 사용한 오픈소스·외부 서비스
+
+| 이름 | 어디에 쓰나 | 라이선스 / 이용약관 |
+|---|---|---|
+| [Firebase JavaScript SDK](https://github.com/firebase/firebase-js-sdk) 13.4.0 | 구글 로그인(Authentication), DB(Cloud Firestore). gstatic CDN에서 불러옴 | [Apache License 2.0](https://github.com/firebase/firebase-js-sdk/blob/main/LICENSE) |
+| [Firebase](https://firebase.google.com/) (Google 서비스) | 인증 서버, Firestore 데이터 저장 | [Firebase 서비스 약관](https://firebase.google.com/terms) |
+| [Last.fm API](https://www.last.fm/api) | 곡 검색, 비슷한 곡·가수, 인기곡, 앨범 이미지 | [Last.fm API 이용약관](https://www.last.fm/api/tos) (음악 데이터 출처로 Last.fm을 표시해야 함 → 푸터에 표시) |
+| [Firebase CLI (firebase-tools)](https://github.com/firebase/firebase-tools) | 보안 규칙 배포 (개발 도구, 사이트에는 포함 안 됨) | [MIT License](https://github.com/firebase/firebase-tools/blob/main/LICENSE) |
+| [serve](https://github.com/vercel/serve) | 로컬 테스트용 서버 (개발 도구, 사이트에는 포함 안 됨) | [MIT License](https://github.com/vercel/serve/blob/main/license.md) |
+| [GitHub Pages](https://pages.github.com/) | 사이트 배포 | [GitHub Pages 이용 정책](https://docs.github.com/ko/pages/getting-started-with-github-pages/github-pages-limits) |
+| YouTube 검색 링크 | 곡 카드의 "YouTube에서 찾기" (검색 결과 페이지로 연결만 함, 영상을 가져오지 않음) | [YouTube 서비스 약관](https://www.youtube.com/t/terms) |
+
+그 밖의 코드(HTML/CSS/JS), 로고와 기본 이미지(`assets/`)는 이 팀이 직접 만들었습니다.
+
+## 라이선스
+
+[MIT License](LICENSE) — Copyright (c) 2026 내친구클로드 팀
