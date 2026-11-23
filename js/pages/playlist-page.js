@@ -14,10 +14,12 @@ import {
 import { showStatus, clearStatus } from '../components/status.js';
 import { showToast } from '../components/toast.js';
 import { confirmModal } from '../components/modal.js';
-import { renderTrackCard } from '../components/track-card.js';
+import { renderTrackCard, getRatingSlot } from '../components/track-card.js';
+import { getMyRatingsMap } from '../rating.js';
+import { mountTrackRating } from '../rating-ui.js';
 
 const el = {};
-const state = { user: null, playlistId: '', playlist: null };
+const state = { user: null, playlistId: '', playlist: null, myRatings: new Map() };
 
 // 주소의 ?id= 값 읽기 (Firestore 자동 ID 형식만 허용)
 function readPlaylistId() {
@@ -34,13 +36,18 @@ function renderHeader() {
   setText(document, 'playlist-meta', `${tracks.length} / ${MAX_TRACKS}곡${date ? ` · ${date} 수정` : ''}`);
 }
 
-// 곡 카드 하나 만들기 (5단계에서 별점을 붙이기 위해 따로 분리)
+// 곡 카드 하나 만들기 (별점 포함)
 function createTrackCard(track) {
   const added = formatDate(toDate(track.addedAt));
-  return renderTrackCard(track, {
+  const card = renderTrackCard(track, {
     meta: added ? `${added} 추가` : '',
     onRemove: handleRemoveTrack,
   });
+  mountTrackRating(getRatingSlot(card), track, {
+    user: state.user,
+    myScore: state.myRatings.get(track.key)?.score ?? null,
+  });
+  return card;
 }
 
 // 곡 목록 그리기
@@ -76,6 +83,11 @@ async function loadPlaylist() {
       return;
     }
     state.playlist = playlist;
+    try {
+      state.myRatings = await getMyRatingsMap(state.user.uid);
+    } catch (error) {
+      console.warn('[playlist] 내 평점을 못 불러왔어요', error);
+    }
     clearStatus(el.pageStatus);
     el.content.hidden = false;
     renderHeader();

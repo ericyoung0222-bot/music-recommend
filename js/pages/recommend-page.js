@@ -15,8 +15,11 @@ import { showStatus, clearStatus } from '../components/status.js';
 import { showToast } from '../components/toast.js';
 import { renderSuggestion } from '../components/suggestion.js';
 import { renderChip } from '../components/chip.js';
-import { renderTrackCard } from '../components/track-card.js';
+import { renderTrackCard, getRatingSlot } from '../components/track-card.js';
 import { openAddToPlaylistModal } from '../playlist-modal.js';
+import { isAuthAvailable, getCurrentUser } from '../auth.js';
+import { getLowRatedKeys, getMyRatingsMap } from '../rating.js';
+import { mountTrackRating } from '../rating-ui.js';
 
 const MIN_SEEDS = 3;
 const MAX_SEEDS = 5;
@@ -240,9 +243,36 @@ function handleSearchKeydown(event) {
 // 추천 결과
 // ---------------------------------------------------------------------
 
-// 결과에서 뺄 곡 키 (5단계: 로그인 시 내가 2점 이하로 준 곡)
-async function getExcludeKeys() {
-  return new Set();
+// 결과에서 뺄 곡 키: 로그인했다면 내가 2점 이하로 준 곡 (실패해도 추천은 계속)
+async function getExcludeKeys(user) {
+  if (!user) return new Set();
+  try {
+    return await getLowRatedKeys(user.uid);
+  } catch (error) {
+    console.warn('[recommend] 저평가 곡 목록을 못 불러와서 제외 없이 추천해요', error);
+    return new Set();
+  }
+}
+
+// 지금 로그인한 사용자 (Firebase 설정이 없으면 null)
+async function getUserIfAny() {
+  if (!isAuthAvailable()) return null;
+  try {
+    return await getCurrentUser();
+  } catch {
+    return null;
+  }
+}
+
+// 내 평점 표 (없거나 실패하면 빈 표)
+async function getMyRatings(user) {
+  if (!user) return new Map();
+  try {
+    return await getMyRatingsMap(user.uid);
+  } catch (error) {
+    console.warn('[recommend] 내 평점을 못 불러왔어요', error);
+    return new Map();
+  }
 }
 
 // 추천 카드의 "플레이리스트에 추가" → 플레이리스트 선택 모달
@@ -253,9 +283,16 @@ function handleAddToPlaylist(track) {
   });
 }
 
-// 결과 카드 그리기
-function renderResults(tracks) {
-  const cards = tracks.map((track) => renderTrackCard(track, { onAdd: handleAddToPlaylist }));
+// 결과 카드 그리기 (카드마다 별점 붙이기)
+function renderResults(tracks, { user, myRatings }) {
+  const cards = tracks.map((track) => {
+    const card = renderTrackCard(track, { onAdd: handleAddToPlaylist });
+    mountTrackRating(getRatingSlot(card), track, {
+      user,
+      myScore: myRatings.get(track.key)?.score ?? null,
+    });
+    return card;
+  });
   el.resultsList.replaceChildren(...cards);
 }
 
@@ -274,7 +311,8 @@ async function runRecommend() {
   el.resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   try {
-    const excludeKeys = await getExcludeKeys();
+    const user = await getUserIfAny();
+    const excludeKeys = await getExcludeKeys(user);
     const { tracks, usedFallback, failedSeeds } = await getRecommendations(state.seeds, { excludeKeys });
 
     if (!tracks.length) {
@@ -290,8 +328,9 @@ async function runRecommend() {
     const notes = [`${tracks.length}곡을 추천해요.`];
     if (usedFallback) notes.push('비슷한 곡 정보가 적어서 비슷한 가수의 인기곡도 함께 담았어요.');
     if (failedSeeds) notes.push(`고른 곡 중 ${failedSeeds}곡은 정보를 가져오지 못했어요.`);
+    if (excludeKeys.size) notes.push('내가 2점 이하로 평가한 곡은 뺐어요.');
     setText(el.resultsSection, 'results-summary', notes.join(' '));
-    renderResults(tracks);
+    renderResults(tracks, { user, myRatings: await getMyRatings(user) });
   } catch (error) {
     console.error('[recommend] 추천 실패', error);
     setState(el.resultsSection, 'is-error', true);
