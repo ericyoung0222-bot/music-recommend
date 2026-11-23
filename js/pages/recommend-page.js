@@ -159,6 +159,9 @@ function selectSuggestion(index, { pointerType = '' } = {}) {
   if (!track) return;
   addSeed(track);
   el.searchInput.value = '';
+  // 폰 한글 입력: 후보를 누르는 순간 조합 중이던 글자가 확정되며 input 이벤트가 한 번 더 와서
+  // 검색이 예약됨 → 취소하지 않으면 0.3초 뒤 목록이 다시 열려 고른 곡(칩)을 덮어 "선택이 안 된 것"처럼 보임
+  runSearch.cancel();
   state.searchToken += 1; // 진행 중인 검색 무시
   setState(el.searchWrap, 'is-loading', false);
   setSuggestionsOpen(false);
@@ -174,6 +177,8 @@ function isInSearchArea(node) {
 
 // 검색 실행 (입력 후 300ms 동안 추가 입력이 없을 때)
 const runSearch = debounce(async (query) => {
+  // 그 사이 입력창 내용이 바뀌었으면(곡 선택으로 비워짐 등) 옛 검색어로 찾지 않음
+  if (el.searchInput.value.trim() !== query) return;
   state.searchToken += 1;
   const token = state.searchToken;
   setState(el.searchWrap, 'is-loading', true);
@@ -182,6 +187,7 @@ const runSearch = debounce(async (query) => {
   try {
     const results = await searchTracks(query, SEARCH_LIMIT);
     if (token !== state.searchToken) return; // 그 사이 새 검색이 시작됨
+    if (el.searchInput.value.trim() !== query) return; // 그 사이 입력창이 바뀜
     const chosen = new Set(state.seeds.map((seed) => seed.key));
     const fresh = results.filter((track) => !chosen.has(track.key));
     renderSuggestions(fresh);
