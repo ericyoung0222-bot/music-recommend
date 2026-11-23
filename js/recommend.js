@@ -8,7 +8,7 @@
 // 3. [곡마다 점수 맞추기] 입력곡마다 가장 높은 점수가 1이 되도록 나눠서,
 //    정보가 많은 곡 하나가 결과를 독차지하지 않게 함
 // 4. 곡마다 점수를 합산하고, 몇 개의 입력곡에서 나왔는지 셈
-// 5. 입력곡 자체(다른 표기 포함)와 제외 목록(로그인 시 내가 2점 이하로 준 곡)은 제외
+// 5. 입력곡 자체(같은 가수의 다른 표기 포함)와 제외 목록(로그인 시 내가 2점 이하로 준 곡)은 제외
 // 6. 점수 내림차순(동점이면 등장 횟수 순), 같은 곡의 다른 표기는 하나만,
 //    같은 가수는 최대 2곡, 상위 15곡
 // 7. 그래도 5곡 미만이면 모든 입력곡 가수의 비슷한 가수 인기곡으로 한 번 더 보충
@@ -54,10 +54,22 @@ function hasNonLatin(text) {
   return /[^\u0000-ɏ]/.test(text);
 }
 
-// 입력곡과 사실상 같은 곡인지 (같은 제목, 또는 입력곡 제목이 영어가 아닐 때 그 제목을 포함)
-function isSameAsSeed(entryTitleKey, seedTitleKeys) {
-  return seedTitleKeys.some((seedKey) => entryTitleKey === seedKey
-    || (seedKey.length >= 2 && hasNonLatin(seedKey) && entryTitleKey.includes(seedKey)));
+// 가수가 같은지 (artistKey가 같거나, 한쪽이 다른 쪽을 포함: "아이유" ⊂ "아이유 (iu)" 등)
+function isSameArtist(a, b) {
+  if (!a || !b) return false;
+  return a === b || a.includes(b) || b.includes(a);
+}
+
+// 입력곡과 사실상 같은 곡인지 — 가수가 같을 때만 판단
+//  - 제목 키가 완전히 같으면 같은 곡 (예: "Gymnopédie No. 1" = "Gymnopédie No.1")
+//  - 입력곡 제목이 영어가 아니면, 그 제목을 포함하는 곡도 같은 곡 (예: "Galaxy 우주를 줄게" ⊃ "우주를 줄게")
+//  가수를 함께 보지 않으면 "사랑"을 고를 때 다른 가수의 "첫사랑", "사랑비"까지 빠지는 문제가 생김
+// seeds: [{ titleKey, artistKey }]
+function isSameAsSeed(entryTitleKey, entryArtistKey, seeds) {
+  return seeds.some((seed) => isSameArtist(entryArtistKey, seed.artistKey) && (
+    entryTitleKey === seed.titleKey
+    || (seed.titleKey.length >= 2 && hasNonLatin(seed.titleKey) && entryTitleKey.includes(seed.titleKey))
+  ));
 }
 
 // 후보 하나 만들기
@@ -147,11 +159,11 @@ function addSeedCandidates(table, candidates, seedIndex) {
 }
 
 // 정렬 → 제외 → 같은 곡 다른 표기 제거 → 가수당 최대 N곡 → 상위 limit곡
-// seedTitles: 입력곡 제목 (다른 표기로 다시 나오는 입력곡을 빼기 위해)
+// seeds: 입력곡 [{ title, artist }] (같은 가수의 같은 곡이 다른 표기로 다시 나오면 빼기 위해)
 export function rankCandidates(entries, {
-  excludeKeys = new Set(), seedTitles = [], maxPerArtist = 2, limit = 15,
+  excludeKeys = new Set(), seeds = [], maxPerArtist = 2, limit = 15,
 } = {}) {
-  const seedTitleKeys = seedTitles.map(titleKey);
+  const seedKeys = seeds.map((s) => ({ titleKey: titleKey(s.title), artistKey: artistKey(s.artist) }));
   const sorted = entries
     .filter((entry) => !excludeKeys.has(entry.key))
     .sort((a, b) => (b.score - a.score) || (b.count - a.count));
@@ -161,8 +173,8 @@ export function rankCandidates(entries, {
   const picked = [];
   for (const entry of sorted) {
     const tk = titleKey(entry.title);
-    if (seenTitles.has(tk) || isSameAsSeed(tk, seedTitleKeys)) continue;
     const ak = artistKey(entry.artist);
+    if (seenTitles.has(tk) || isSameAsSeed(tk, ak, seedKeys)) continue;
     const used = perArtist.get(ak) || 0;
     if (used >= maxPerArtist) continue;
     perArtist.set(ak, used + 1);
@@ -240,7 +252,7 @@ export async function getRecommendations(seeds, { excludeKeys = new Set(), optio
   // 5~6단계: 제외, 정렬, 가수 제한, 상위 N곡
   const rankOptions = {
     excludeKeys: blocked,
-    seedTitles: seeds.map((s) => s.title),
+    seeds,
     maxPerArtist: options.maxPerArtist,
     limit: options.resultLimit,
   };
