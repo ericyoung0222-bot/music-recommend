@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>스타일 가이드 · 곡찾기</title>
+  <meta name="description" content="디자이너용: 모든 컴포넌트와 상태를 가짜 데이터로 보여주는 페이지">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <!-- 각 페이지 전용 CSS도 함께 불러와서 페이지 요소까지 미리 볼 수 있게 -->
+  <link rel="stylesheet" href="css/pages/home.css">
+  <link rel="stylesheet" href="css/pages/recommend.css">
+  <link rel="stylesheet" href="css/pages/login.css">
+  <link rel="stylesheet" href="css/pages/playlists.css">
+  <link rel="stylesheet" href="css/pages/playlist.css">
+  <link rel="stylesheet" href="css/pages/ratings.css">
+  <link rel="stylesheet" href="css/pages/styleguide.css">
+  <script type="module" src="js/pages/styleguide-page.js"></script>
+</head>
+<body data-page="styleguide">
+  <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+  <div data-js="site-header"><p class="boot-notice">불러오는 중… 이 문구가 계속 보이면 README의 "로컬에서 실행하기"를 확인하세요.</p></div>
+
+  <main id="main" class="page container sg" tabindex="-1">
+    <header class="page-header">
+      <h1 class="page-header__title">스타일 가이드</h1>
+      <p class="page-header__desc">로그인이나 API 호출 없이 가짜 데이터로 모든 컴포넌트와 상태를 보여주는 페이지예요. CSS를 고친 뒤 여기서 한 번에 확인하세요. 자세한 설명은 docs/STYLE_GUIDE.md에 있어요.</p>
+    </header>
+
+    <nav class="sg-toc" aria-label="스타일 가이드 목차">
+      <a href="#sg-colors">색</a>
+      <a href="#sg-type">글자</a>
+      <a href="#sg-tokens">간격·모서리·그림자</a>
+      <a href="#sg-header">헤더</a>
+      <a href="#sg-buttons">버튼</a>
+      <a href="#sg-forms">입력창</a>
+      <a href="#sg-search">곡 검색·칩</a>
+      <a href="#sg-cards">곡 카드</a>
+      <a href="#sg-stars">별점</a>
+      <a href="#sg-status">상태 화면</a>
+      <a href="#sg-toast">토스트</a>
+      <a href="#sg-modal">모달</a>
+      <a href="#sg-playlists">플레이리스트</a>
+      <a href="#sg-notice">안내 상자</a>
+    </nav>
+
+    <!-- ===================== 색 ===================== -->
+    <section class="sg-section" id="sg-colors">
+      <h2 class="sg-section__title">색 (base.css 변수)</h2>
+      <ul class="sg-swatches">
+        <li class="sg-swatch sg-swatch--bg"><span class="sg-swatch__chip"></span><code>--color-bg</code></li>
+        <li class="sg-swatch sg-swatch--surface"><span class="sg-swatch__chip"></span><code>--color-surface</code></li>
+        <li class="sg-swatch sg-swatch--surface-alt"><span class="sg-swatch__chip"></span><code>--color-surface-alt</code></li>
+        <li class="sg-swatch sg-swatch--text"><span class="sg-swatch__chip"></span><code>--color-text</code></li>
+        <li class="sg-swatch sg-swatch--text-muted"><span class="sg-swatch__chip"></span><code>--color-text-muted</code></li>
+        <li class="sg-swatch sg-swatch--border"><span class="sg-swatch__chip"></span><code>--color-border</code></li>
+        <li class="sg-swatch sg-swatch--primary"><span class="sg-swatch__chip"></span><code>--color-primary</code></li>
+        <li class="sg-swatch sg-swatch--primary-hover"><span class="sg-swatch__chip"></span><code>--color-primary-hover</code></li>
+        <li class="sg-swatch sg-swatch--primary-soft"><span class="sg-swatch__chip"></span><code>--color-primary-soft</code></li>
+        <li class="sg-swatch sg-swatch--on-primary"><span class="sg-swatch__chip"></span><code>--color-on-primary</code></li>
+        <li class="sg-swatch sg-swatch--star"><span class="sg-swatch__chip"></span><code>--color-star</code></li>
+        <li class="sg-swatch sg-swatch--star-empty"><span class="sg-swatch__chip"></span><code>--color-star-empty</code></li>
+        <li class="sg-swatch sg-swatch--danger"><span class="sg-swatch__chip"></span><code>--color-danger</code></li>
+        <li class="sg-swatch sg-swatch--danger-hover"><span class="sg-swatch__chip"></span><code>--color-danger-hover</code></li>
+        <li class="sg-swatch sg-swatch--danger-soft"><span class="sg-swatch__chip"></span><code>--color-danger-soft</code></li>
+        <li class="sg-swatch sg-swatch--success"><span class="sg-swatch__chip"></span><code>--color-success</code></li>
+        <li class="sg-swatch sg-swatch--success-soft"><span class="sg-swatch__chip"></span><code>--color-success-soft</code></li>
+        <li class="sg-swatch sg-swatch--focus"><span class="sg-swatch__chip"></span><code>--color-focus</code></li>
+        <li class="sg-swatch sg-swatch--overlay"><span class="sg-swatch__chip"></span><code>--color-overlay</code></li>
+      </ul>
+    </section>
+
+    <!-- ===================== 글자 ===================== -->
+    <section class="sg-section" id="sg-type">
+      <h2 class="sg-section__title">글자</h2>
+      <div class="sg-demo sg-stack">
+        <p class="sg-type sg-type--3xl">3xl 좋아하는 곡으로 새 음악 찾기</p>
+        <h1>h1 제목 (--font-size-2xl)</h1>
+        <h2>h2 제목 (--font-size-xl)</h2>
+        <h3>h3 제목 (--font-size-lg)</h3>
+        <p>본문 (--font-size-base) 고른 곡과 분위기가 비슷한 곡을 Last.fm 데이터로 추천해 드려요.</p>
+        <p class="sg-type sg-type--sm">작은 글자 (--font-size-sm) 보조 설명에 써요.</p>
+        <p class="sg-type sg-type--xs">아주 작은 글자 (--font-size-xs) 날짜 등</p>
+        <p><a href="#sg-type">링크 모양</a></p>
+      </div>
+    </section>
+
+    <!-- ===================== 간격·모서리·그림자 ===================== -->
+    <section class="sg-section" id="sg-tokens">
+      <h2 class="sg-section__title">간격 · 모서리 · 그림자</h2>
+      <div class="sg-demo sg-stack">
+        <ul class="sg-spaces">
+          <li class="sg-space sg-space--1"><span class="sg-space__bar"></span><code>--space-1</code></li>
+          <li class="sg-space sg-space--2"><span class="sg-space__bar"></span><code>--space-2</code></li>
+          <li class="sg-space sg-space--3"><span class="sg-space__bar"></span><code>--space-3</code></li>
+          <li class="sg-space sg-space--4"><span class="sg-space__bar"></span><code>--space-4</code></li>
+          <li class="sg-space sg-space--5"><span class="sg-space__bar"></span><code>--space-5</code></li>
+          <li class="sg-space sg-space--6"><span class="sg-space__bar"></span><code>--space-6</code></li>
+          <li class="sg-space sg-space--7"><span class="sg-space__bar"></span><code>--space-7</code></li>
+          <li class="sg-space sg-space--8"><span class="sg-space__bar"></span><code>--space-8</code></li>
+        </ul>
+        <ul class="sg-boxes">
+          <li class="sg-box sg-box--radius-sm"><code>--radius-sm</code></li>
+          <li class="sg-box sg-box--radius-md"><code>--radius-md</code></li>
+          <li class="sg-box sg-box--radius-lg"><code>--radius-lg</code></li>
+          <li class="sg-box sg-box--radius-pill"><code>--radius-pill</code></li>
+          <li class="sg-box sg-box--shadow-sm"><code>--shadow-sm</code></li>
+          <li class="sg-box sg-box--shadow-md"><code>--shadow-md</code></li>
+          <li class="sg-box sg-box--shadow-lg"><code>--shadow-lg</code></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================== 헤더 ===================== -->
+    <section class="sg-section" id="sg-header">
+      <h2 class="sg-section__title">헤더 (로그인 상태 전환)</h2>
+      <p class="sg-note">맨 위 헤더가 실제 헤더예요. 아래 버튼으로 로그인/로그아웃 모습을 바꿔 볼 수 있어요. (가짜 사용자, 실제 로그인 아님)</p>
+      <div class="sg-demo sg-row">
+        <button class="btn btn--secondary btn--small" type="button" data-js="sg-login-on">로그인 상태로 보기</button>
+        <button class="btn btn--secondary btn--small" type="button" data-js="sg-login-off">로그아웃 상태로 보기</button>
+      </div>
+    </section>
+
+    <!-- ===================== 버튼 ===================== -->
+    <section class="sg-section" id="sg-buttons">
+      <h2 class="sg-section__title">버튼</h2>
+      <div class="sg-demo sg-row">
+        <button class="btn" type="button">기본</button>
+        <button class="btn btn--primary" type="button">btn--primary</button>
+        <button class="btn btn--secondary" type="button">btn--secondary</button>
+        <button class="btn btn--ghost" type="button">btn--ghost</button>
+        <button class="btn btn--danger" type="button">btn--danger</button>
+      </div>
+      <div class="sg-demo sg-row">
+        <button class="btn btn--primary btn--small" type="button">btn--small</button>
+        <button class="btn btn--primary is-disabled" type="button" disabled>비활성 (is-disabled)</button>
+        <button class="btn btn--primary is-loading" type="button" aria-busy="true" disabled>처리 중 (is-loading)</button>
+        <a class="btn btn--secondary" href="#sg-buttons">a 태그 버튼</a>
+      </div>
+      <div class="sg-demo sg-narrow">
+        <button class="btn btn--primary btn--block" type="button">btn--block (가로 꽉 채움)</button>
+      </div>
+    </section>
+
+    <!-- ===================== 입력창 ===================== -->
+    <section class="sg-section" id="sg-forms">
+      <h2 class="sg-section__title">입력창</h2>
+      <div class="sg-demo sg-stack">
+        <div class="form-row">
+          <label class="field">
+            <span class="field__label">field__label</span>
+            <input class="input" type="text" placeholder="input 기본">
+          </label>
+          <button class="btn btn--primary" type="button">버튼</button>
+        </div>
+        <label class="field">
+          <span class="field__label">비활성 입력창</span>
+          <input class="input" type="text" value="disabled" disabled>
+          <span class="field__hint">field__hint: 보조 설명 글자</span>
+        </label>
+        <label class="field sg-narrow">
+          <span class="field__label">select</span>
+          <select class="select">
+            <option>최신순</option>
+            <option>점수 높은 순</option>
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <!-- ===================== 곡 검색·칩 ===================== -->
+    <section class="sg-section" id="sg-search">
+      <h2 class="sg-section__title">곡 검색 · 자동완성 · 칩</h2>
+      <p class="sg-note">두 번째 후보가 키보드로 고른 상태(is-active)예요. 오른쪽에 도는 표시는 검색 중(is-loading)이에요.</p>
+      <div class="sg-demo seed-panel">
+        <div class="seed-form">
+          <div class="search-box sg-search-open">
+            <label class="field__label" for="sg-search">곡 검색</label>
+            <div class="search-box__input-wrap is-loading">
+              <input class="input" id="sg-search" type="search" value="ditto" readonly>
+            </div>
+            <ul class="suggestions" role="listbox" aria-label="검색 결과 예시" data-js="sg-suggestions"></ul>
+          </div>
+          <p class="field__hint seed-form__count">3 / 5곡 선택 (최소 3곡)</p>
+          <ul class="chip-list" data-js="sg-chips" aria-label="선택한 곡 예시"></ul>
+          <div class="seed-form__actions">
+            <button class="btn btn--primary" type="button">추천받기</button>
+            <button class="btn btn--ghost" type="button">모두 지우기</button>
+          </div>
+        </div>
+      </div>
+      <h3 class="sg-subtitle">검색 결과 없음 / 검색 에러 (status-slot--compact)</h3>
+      <div class="sg-demo sg-stack">
+        <div class="status-slot status-slot--compact" data-js="sg-search-empty"></div>
+        <div class="status-slot status-slot--compact" data-js="sg-search-error"></div>
+      </div>
+    </section>
+
+    <!-- ===================== 곡 카드 ===================== -->
+    <section class="sg-section" id="sg-cards">
+      <h2 class="sg-section__title">곡 카드</h2>
+      <p class="sg-note">왼쪽부터: 추천 결과 카드 / 앨범 이미지 없음(기본 이미지) / 플레이리스트 상세 카드(빼기 버튼, 추가한 날짜) / 아주 긴 제목</p>
+      <ul class="card-grid" data-js="sg-cards"></ul>
+    </section>
+
+    <!-- ===================== 별점 ===================== -->
+    <section class="sg-section" id="sg-stars">
+      <h2 class="sg-section__title">별점</h2>
+      <p class="sg-note">별을 눌러 보세요. "로그인 안 됨" 예시는 누르면 로그인 안내 토스트가 떠요.</p>
+      <dl class="sg-states" data-js="sg-stars"></dl>
+    </section>
+
+    <!-- ===================== 상태 화면 ===================== -->
+    <section class="sg-section" id="sg-status">
+      <h2 class="sg-section__title">상태 화면 (is-loading / is-empty / is-error)</h2>
+      <div class="sg-grid">
+        <div class="status-slot" data-js="sg-status-loading"></div>
+        <div class="status-slot" data-js="sg-status-empty"></div>
+        <div class="status-slot" data-js="sg-status-error"></div>
+      </div>
+    </section>
+
+    <!-- ===================== 토스트 ===================== -->
+    <section class="sg-section" id="sg-toast">
+      <h2 class="sg-section__title">토스트 알림</h2>
+      <p class="sg-note">버튼을 누르면 화면 아래에 실제로 떠요. 아래는 고정 예시예요.</p>
+      <div class="sg-demo sg-row">
+        <button class="btn btn--secondary btn--small" type="button" data-js="sg-toast-basic">기본</button>
+        <button class="btn btn--secondary btn--small" type="button" data-js="sg-toast-success">성공 (is-success)</button>
+        <button class="btn btn--secondary btn--small" type="button" data-js="sg-toast-error">에러 (is-error)</button>
+        <button class="btn btn--secondary btn--small" type="button" data-js="sg-toast-link">링크 포함</button>
+      </div>
+      <div class="sg-demo sg-stack sg-toast-samples" data-js="sg-toast-samples"></div>
+    </section>
+
+    <!-- ===================== 모달 ===================== -->
+    <section class="sg-section" id="sg-modal">
+      <h2 class="sg-section__title">모달</h2>
+      <div class="sg-demo sg-row">
+        <button class="btn btn--primary btn--small" type="button" data-js="sg-modal-picker">"플레이리스트에 추가" 모달 열기</button>
+        <button class="btn btn--danger btn--small" type="button" data-js="sg-modal-confirm">삭제 확인 모달 열기</button>
+      </div>
+    </section>
+
+    <!-- ===================== 플레이리스트 ===================== -->
+    <section class="sg-section" id="sg-playlists">
+      <h2 class="sg-section__title">플레이리스트</h2>
+      <h3 class="sg-subtitle">새 플레이리스트 폼 (playlists.html)</h3>
+      <div class="sg-demo">
+        <div class="create-form form-row">
+          <label class="field">
+            <span class="field__label">새 플레이리스트</span>
+            <input class="input" type="text" placeholder="예: 비 오는 날 듣는 곡">
+          </label>
+          <button class="btn btn--primary" type="button">만들기</button>
+        </div>
+      </div>
+      <h3 class="sg-subtitle">플레이리스트 카드 목록</h3>
+      <ul class="playlist-list" data-js="sg-playlist-cards"></ul>
+      <h3 class="sg-subtitle">"플레이리스트에 추가" 모달 내용 (모달 없이 펼쳐 놓은 모습)</h3>
+      <div class="sg-demo sg-narrow" data-js="sg-picker"></div>
+    </section>
+
+    <!-- ===================== 안내 상자 ===================== -->
+    <section class="sg-section" id="sg-notice">
+      <h2 class="sg-section__title">안내 상자 (login.html 인앱 브라우저 안내)</h2>
+      <div class="notice sg-narrow" role="note">
+        <h3 class="notice__title">앱 안의 브라우저에서는 구글 로그인이 막혀 있어요</h3>
+        <p class="notice__text">카카오톡·인스타그램 같은 앱 안에서 열린 화면에서는 Google이 로그인을 막아요.</p>
+        <div class="notice__actions">
+          <a class="btn btn--primary btn--small" href="#sg-notice">기본 브라우저로 열기</a>
+          <button class="btn btn--secondary btn--small" type="button">주소 복사</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div data-js="site-footer"></div>
+</body>
+</html>

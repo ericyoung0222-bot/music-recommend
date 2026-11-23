@@ -1,0 +1,207 @@
+/* =====================================================================
+   스타일 가이드 페이지(styleguide.html) 전용 스타일
+   sg- 로 시작하는 클래스는 이 페이지에서만 쓰는 보기용입니다. (실제 서비스 화면과 무관)
+   ===================================================================== */
+
+.sg-toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-6);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-size: var(--font-size-sm);
+}
+
+.sg-section {
+  margin-bottom: var(--space-7);
+  scroll-margin-top: var(--space-8);
+}
+
+.sg-section__title {
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 2px solid var(--color-border);
+}
+
+.sg-subtitle {
+  margin: var(--space-5) 0 var(--space-3);
+  font-size: var(--font-size-base);
+}
+
+.sg-note {
+  margin-bottom: var(--space-3);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.sg-demo {
+  margin-bottom: var(--space-3);
+  padding: var(--space-4);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.sg-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.sg-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sg-narrow {
+  max-width: 420px;
+}
+
+.sg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-4);
+}
+
+/* ---------- 색 견본 ---------- */
+.sg-swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: var(--space-3);
+}
+
+.sg-swatch {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+}
+
+.sg-swatch__chip {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.sg-swatch--bg .sg-swatch__chip { background: var(--color-bg); }
+.sg-swatch--surface .sg-swatch__chip { background: var(--color-surface); }
+.sg-swatch--surface-alt .sg-swatch__chip { background: var(--color-surface-alt); }
+.sg-swatch--text .sg-swatch__chip { background: var(--color-text); }
+.sg-swatch--text-muted .sg-swatch__chip { background: var(--color-text-muted); }
+.sg-swatch--border .sg-swatch__chip { background: var(--color-border); }
+.sg-swatch--primary .sg-swatch__chip { background: var(--color-primary); }
+.sg-swatch--primary-hover .sg-swatch__chip { background: var(--color-primary-hover); }
+.sg-swatch--primary-soft .sg-swatch__chip { background: var(--color-primary-soft); }
+.sg-swatch--on-primary .sg-swatch__chip { background: var(--color-on-primary); }
+.sg-swatch--star .sg-swatch__chip { background: var(--color-star); }
+.sg-swatch--star-empty .sg-swatch__chip { background: var(--color-star-empty); }
+.sg-swatch--danger .sg-swatch__chip { background: var(--color-danger); }
+.sg-swatch--danger-hover .sg-swatch__chip { background: var(--color-danger-hover); }
+.sg-swatch--danger-soft .sg-swatch__chip { background: var(--color-danger-soft); }
+.sg-swatch--success .sg-swatch__chip { background: var(--color-success); }
+.sg-swatch--success-soft .sg-swatch__chip { background: var(--color-success-soft); }
+.sg-swatch--focus .sg-swatch__chip { background: var(--color-focus); }
+.sg-swatch--overlay .sg-swatch__chip { background: var(--color-overlay); }
+
+/* ---------- 글자 크기 ---------- */
+.sg-type--3xl { font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); line-height: var(--line-height-tight); }
+.sg-type--sm { font-size: var(--font-size-sm); }
+.sg-type--xs { font-size: var(--font-size-xs); }
+
+/* ---------- 간격 ---------- */
+.sg-spaces {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.sg-space {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--font-size-xs);
+}
+
+.sg-space__bar {
+  height: 12px;
+  background: var(--color-primary);
+}
+
+.sg-space--1 .sg-space__bar { width: var(--space-1); }
+.sg-space--2 .sg-space__bar { width: var(--space-2); }
+.sg-space--3 .sg-space__bar { width: var(--space-3); }
+.sg-space--4 .sg-space__bar { width: var(--space-4); }
+.sg-space--5 .sg-space__bar { width: var(--space-5); }
+.sg-space--6 .sg-space__bar { width: var(--space-6); }
+.sg-space--7 .sg-space__bar { width: var(--space-7); }
+.sg-space--8 .sg-space__bar { width: var(--space-8); }
+
+/* ---------- 모서리·그림자 ---------- */
+.sg-boxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.sg-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 72px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: var(--font-size-xs);
+}
+
+.sg-box--radius-sm { border-radius: var(--radius-sm); }
+.sg-box--radius-md { border-radius: var(--radius-md); }
+.sg-box--radius-lg { border-radius: var(--radius-lg); }
+.sg-box--radius-pill { border-radius: var(--radius-pill); }
+.sg-box--shadow-sm { border: 0; box-shadow: var(--shadow-sm); }
+.sg-box--shadow-md { border: 0; box-shadow: var(--shadow-md); }
+.sg-box--shadow-lg { border: 0; box-shadow: var(--shadow-lg); }
+
+/* ---------- 자동완성 펼친 모습 (보기용: 목록을 문서 흐름 안에 둠) ---------- */
+.sg-search-open .suggestions {
+  position: static;
+  margin-top: var(--space-1);
+}
+
+/* ---------- 별점 상태 목록 ---------- */
+.sg-states {
+  display: grid;
+  grid-template-columns: minmax(140px, max-content) 1fr;
+  gap: var(--space-3) var(--space-5);
+  align-items: center;
+  margin: 0;
+}
+
+.sg-states dt {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.sg-states dd {
+  margin: 0;
+}
+
+/* ---------- 토스트 고정 예시 (화면 아래가 아니라 이 자리에 표시) ---------- */
+.sg-toast-samples {
+  align-items: flex-start;
+}
+
+@media (max-width: 480px) {
+  .sg-states {
+    grid-template-columns: 1fr;
+    gap: var(--space-1);
+  }
+  .sg-states dd {
+    margin-bottom: var(--space-3);
+  }
+}
