@@ -13,7 +13,8 @@ import { searchTracks, getLastfmErrorMessage } from '../lastfm.js';
 import { getRecommendations } from '../recommend.js';
 import { showStatus, clearStatus } from '../components/status.js';
 import { showToast } from '../components/toast.js';
-import { renderSuggestion } from '../components/suggestion.js';
+// ?v=: 폰 브라우저가 고치기 전 파일을 캐시에서 계속 쓰지 않도록 (바꿀 때마다 숫자 갱신)
+import { renderSuggestion, bindSuggestionList } from '../components/suggestion.js?v=20261123c';
 import { renderChip } from '../components/chip.js';
 import { renderTrackCard, getRatingSlot } from '../components/track-card.js';
 import { openAddToPlaylistModal } from '../playlist-modal.js';
@@ -33,6 +34,8 @@ const state = {
   suggestions: [],    // 지금 보이는 검색 후보
   activeIndex: -1,    // 키보드로 고른 후보 번호
   searchToken: 0,     // 늦게 도착한 옛 검색 결과를 무시하기 위한 번호
+  ignoreQuery: '',    // 곡을 고르며 지운 검색어 (한글 입력기가 글자를 되살려도 다시 검색하지 않기 위해)
+  ignoreUntil: 0,
   defaultPlaceholder: '',
 };
 
@@ -122,18 +125,26 @@ function setSuggestionsOpen(open) {
   if (!open) {
     state.activeIndex = -1;
     el.searchInput.removeAttribute('aria-activedescendant');
+    // 키보드로 고르던 표시도 지움 (같은 결과로 다시 열릴 때 엉뚱한 줄이 강조되지 않게)
+    $$('suggestion', el.suggestions).forEach((item) => {
+      setState(item, 'is-active', false);
+      item.setAttribute('aria-selected', 'false');
+    });
   }
 }
 
 // 후보 목록 그리기
 function renderSuggestions(tracks) {
+  // 결과가 같으면 다시 그리지 않음 (누르고 있는 후보가 중간에 바뀌면 iOS가 탭을 버림)
+  const same = tracks.length === state.suggestions.length
+    && tracks.every((track, i) => track.key === state.suggestions[i].key)
+    && el.suggestions.children.length === tracks.length;
   state.suggestions = tracks;
-  state.activeIndex = -1;
-  const items = tracks.map((track, index) => renderSuggestion(track, {
-    id: `suggestion-${index}`,
-    onSelect: (_track, { pointerType } = {}) => selectSuggestion(index, { pointerType }),
-  }));
-  el.suggestions.replaceChildren(...items);
+  if (!same) {
+    state.activeIndex = -1;
+    const items = tracks.map((track, index) => renderSuggestion(track, { id: `suggestion-${index}` }));
+    el.suggestions.replaceChildren(...items);
+  }
   setSuggestionsOpen(tracks.length > 0);
 }
 
@@ -152,22 +163,30 @@ function setActiveSuggestion(index) {
   items[next].scrollIntoView({ block: 'nearest' });
 }
 
-// 후보 선택 → 칩 추가
-// pointerType이 'touch'/'pen'이면 입력창에 다시 포커스하지 않음 (폰 키보드가 다시 올라오지 않게)
-function selectSuggestion(index, { pointerType = '' } = {}) {
-  const track = state.suggestions[index];
+// 후보 선택 → 칩 추가 (곡 정보를 직접 받음: 목록이 다시 그려져도 누른 곡 그대로)
+// 터치(touch/pen)로 고르면 입력창 포커스를 빼서 폰 키보드를 내리고 칩이 보이게 함
+function selectTrack(track, { pointerType = '' } = {}) {
   if (!track) return;
+  const input = el.searchInput;
+  const byTouch = pointerType === 'touch' || pointerType === 'pen';
+  const typed = input.value.trim();
+  // 먼저 blur: 조합 중인 한글을 입력기가 확정하게 함
+  // (값을 비운 뒤에 확정되면 글자가 되살아나 목록이 다시 열림)
+  if (byTouch && document.activeElement === input) input.blur();
   addSeed(track);
-  el.searchInput.value = '';
-  // 폰 한글 입력: 후보를 누르는 순간 조합 중이던 글자가 확정되며 input 이벤트가 한 번 더 와서
-  // 검색이 예약됨 → 취소하지 않으면 0.3초 뒤 목록이 다시 열려 고른 곡(칩)을 덮어 "선택이 안 된 것"처럼 보임
+  input.value = '';
+  // 터치로 골랐을 때만: 입력기가 지운 글자를 되살려도 1초 동안은 다시 검색하지 않음
+  // (마우스·키보드는 입력창에 그대로 있어 바로 다음 곡을 칠 수 있어야 하므로 켜지 않음)
+  state.ignoreQuery = byTouch ? typed : '';
+  state.ignoreUntil = byTouch ? performance.now() + 1000 : 0;
   runSearch.cancel();
-  state.searchToken += 1; // 진행 중인 검색 무시
+  state.searchToken += 1;     // 진행 중인 검색 무시
+  state.suggestions = [];     // 입력창에 다시 들어올 때 옛 목록(고른 곡 포함)이 열리지 않게
+  el.suggestions.replaceChildren();
   setState(el.searchWrap, 'is-loading', false);
   setSuggestionsOpen(false);
   clearStatus(el.searchStatus);
-  const byTouch = pointerType === 'touch' || pointerType === 'pen';
-  if (!byTouch && !el.searchInput.disabled) el.searchInput.focus();
+  if (!byTouch && !input.disabled) input.focus();
 }
 
 // 검색 영역(입력창 + 후보 목록) 안의 요소인지
@@ -208,8 +227,13 @@ const runSearch = debounce(async (query) => {
 }, 300);
 
 // 입력할 때마다
-function handleSearchInput() {
+function handleSearchInput(event) {
   const query = el.searchInput.value.trim();
+  // 곡을 고른 직후 한글 입력기가 지운 글자(전체 또는 마지막 음절)를 되살린 경우 무시
+  if (query && performance.now() < state.ignoreUntil && state.ignoreQuery.includes(query)) {
+    if (!event?.isComposing) el.searchInput.value = '';
+    return;
+  }
   if (query.length < MIN_QUERY_LENGTH) {
     runSearch.cancel();
     state.searchToken += 1;
@@ -226,20 +250,21 @@ function handleSearchKeydown(event) {
   const open = !el.suggestions.hidden && state.suggestions.length > 0;
   switch (event.key) {
     case 'ArrowDown':
-      if (!state.suggestions.length) return;
+      if (event.isComposing || !state.suggestions.length) return;
       event.preventDefault();
       if (!open) setSuggestionsOpen(true);
       setActiveSuggestion(state.activeIndex + 1);
       break;
     case 'ArrowUp':
-      if (!open) return;
+      if (event.isComposing || !open) return;
       event.preventDefault();
       setActiveSuggestion(state.activeIndex - 1);
       break;
     case 'Enter':
       // 입력창에서 Enter는 폼 제출이 아니라 후보 선택
       event.preventDefault();
-      if (open) selectSuggestion(state.activeIndex >= 0 ? state.activeIndex : 0);
+      if (event.isComposing) break; // 한글 조합을 끝내는 Enter는 선택하지 않음
+      if (open) selectTrack(state.suggestions[state.activeIndex >= 0 ? state.activeIndex : 0], { pointerType: 'keyboard' });
       break;
     case 'Escape':
       if (open) {
@@ -388,6 +413,7 @@ function cacheElements() {
 function bindEvents() {
   el.searchInput.addEventListener('input', handleSearchInput);
   el.searchInput.addEventListener('keydown', handleSearchKeydown);
+  bindSuggestionList(el.suggestions, { onSelect: selectTrack });
   // 후보 목록 닫기: blur로 닫으면 터치에서 click보다 먼저 닫혀 선택이 안 되므로,
   // ① 검색 영역 밖을 눌렀을 때 ② 키보드(Tab)로 포커스가 검색 영역 밖으로 나갔을 때만 닫음
   document.addEventListener('pointerdown', (event) => {
@@ -396,10 +422,14 @@ function bindEvents() {
   [el.searchWrap, el.suggestions].forEach((area) => {
     area.addEventListener('focusout', (event) => {
       // relatedTarget이 없으면(빈 곳 터치 등) 위의 pointerdown이 처리하므로 여기서는 닫지 않음
-      if (event.relatedTarget && !isInSearchArea(event.relatedTarget)) setSuggestionsOpen(false);
+      // 후보(포커스 불가)를 누르면 포커스가 검색 영역을 감싼 조상(<main tabindex="-1">)으로 가는데,
+      // 이건 검색 영역을 떠난 게 아니므로 닫지 않음 (닫으면 폰에서 click이 곡에 닿지 않음)
+      const next = event.relatedTarget;
+      if (next && !isInSearchArea(next) && !next.contains(el.suggestions)) setSuggestionsOpen(false);
     });
   });
   el.searchInput.addEventListener('focus', () => {
+    state.ignoreUntil = 0; // 사용자가 입력창에 다시 들어오면 새로 치는 글자는 모두 검색
     if (state.suggestions.length && el.searchInput.value.trim()) setSuggestionsOpen(true);
   });
 
