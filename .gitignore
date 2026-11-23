@@ -1,0 +1,15 @@
+# 운영체제/편집기 파일
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# 로컬 도구 설정 (Claude Code 등)
+.claude/
+
+# 혹시 설치한 npm 패키지 (이 프로젝트는 빌드 도구를 쓰지 않음)
+node_modules/
+
+# 로그
+*.log
