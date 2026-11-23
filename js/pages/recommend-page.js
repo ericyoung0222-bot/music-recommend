@@ -16,6 +16,7 @@ import { showToast } from '../components/toast.js';
 import { renderSuggestion } from '../components/suggestion.js';
 import { renderChip } from '../components/chip.js';
 import { renderTrackCard } from '../components/track-card.js';
+import { openAddToPlaylistModal } from '../playlist-modal.js';
 
 const MIN_SEEDS = 3;
 const MAX_SEEDS = 5;
@@ -244,9 +245,12 @@ async function getExcludeKeys() {
   return new Set();
 }
 
-// 추천 카드의 "플레이리스트에 추가" (4단계에서 연결)
-function handleAddToPlaylist() {
-  showToast('플레이리스트 기능은 곧 연결돼요');
+// 추천 카드의 "플레이리스트에 추가" → 플레이리스트 선택 모달
+function handleAddToPlaylist(track) {
+  openAddToPlaylistModal(track).catch((error) => {
+    console.error('[recommend] 플레이리스트 모달 오류', error);
+    showToast('플레이리스트를 열지 못했어요. 잠시 후 다시 시도해 주세요.', { type: 'error' });
+  });
 }
 
 // 결과 카드 그리기

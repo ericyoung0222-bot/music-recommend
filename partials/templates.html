@@ -86,6 +86,42 @@
   </li>
 </template>
 
+<!-- 플레이리스트 카드 (내 플레이리스트 목록 페이지) -->
+<template data-template="playlist-card">
+  <li class="playlist-list__item">
+    <a class="playlist-card" data-js="playlist-link" href="playlists.html">
+      <span class="playlist-card__name" data-js="playlist-name"></span>
+      <span class="playlist-card__meta" data-js="playlist-meta"></span>
+    </a>
+  </li>
+</template>
+
+<!-- "플레이리스트에 추가" 모달 안의 내용 -->
+<template data-template="playlist-picker">
+  <div class="picker" data-js="picker">
+    <p class="picker__track" data-js="picker-track"></p>
+    <div class="status-slot status-slot--compact" data-js="picker-status"></div>
+    <ul class="picker__list" data-js="picker-list" aria-label="내 플레이리스트"></ul>
+    <form class="picker__form form-row" data-js="picker-create-form" novalidate>
+      <label class="field">
+        <span class="field__label">새 플레이리스트 만들기</span>
+        <input class="input" type="text" data-js="picker-create-input" maxlength="50" required placeholder="플레이리스트 이름">
+      </label>
+      <button class="btn btn--primary" type="submit" data-js="picker-create-submit">만들고 추가</button>
+    </form>
+  </div>
+</template>
+
+<!-- 위 모달 안의 플레이리스트 한 줄 -->
+<template data-template="playlist-picker-item">
+  <li class="picker__item">
+    <button class="picker__button" type="button" data-js="picker-option">
+      <span class="picker__name" data-js="picker-name"></span>
+      <span class="picker__count" data-js="picker-count"></span>
+    </button>
+  </li>
+</template>
+
 <!-- 확인 모달의 버튼 영역 (예: 삭제 확인) -->
 <template data-template="confirm-body">
   <div class="confirm">
