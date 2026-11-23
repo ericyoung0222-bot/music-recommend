@@ -3,9 +3,10 @@
 // 모든 페이지 스크립트는 맨 처음에 await initLayout()을 호출합니다.
 // =====================================================================
 
-import { $, $$, setText, safeUrl } from './utils/dom.js';
-import { buildLoginUrl, getCurrentPage } from './utils/page.js';
+import { $, $$, setText, safeUrl, setBusy } from './utils/dom.js';
+import { buildLoginUrl, getCurrentPage, isProtectedPage } from './utils/page.js';
 import { loadTemplates } from './components/templates.js';
+import { showToast } from './components/toast.js';
 
 const DEFAULT_AVATAR = 'assets/default-avatar.svg';
 
@@ -31,9 +32,12 @@ async function insertPartial(slotName, path) {
   }
 }
 
+// 메뉴에 없는 페이지는 부모 메뉴를 표시 (플레이리스트 상세 → 내 플레이리스트)
+const NAV_PARENT = { playlist: 'playlists' };
+
 // 현재 페이지 메뉴에 is-active와 aria-current 표시
 function markActiveNav() {
-  const page = getCurrentPage();
+  const page = NAV_PARENT[getCurrentPage()] || getCurrentPage();
   $$('nav-link').forEach((link) => {
     const active = link.dataset.page === page;
     link.classList.toggle('is-active', active);
@@ -63,14 +67,35 @@ export function renderHeaderUser(user) {
   const avatar = $('user-avatar', menu);
   if (avatar) {
     avatar.alt = `${name} 프로필 사진`;
-    avatar.referrerPolicy = 'no-referrer'; // 구글 프로필 사진이 가끔 리퍼러 때문에 막히는 문제 방지
-    avatar.src = safeUrl(user.photoURL) || DEFAULT_AVATAR;
+    avatar.referrerPolicy = 'no-referrer'; // 구글 프로필 사진이 리퍼러 때문에 막히는 문제 방지
     avatar.addEventListener('error', () => { avatar.src = DEFAULT_AVATAR; }, { once: true });
+    avatar.src = safeUrl(user.photoURL) || DEFAULT_AVATAR;
   }
 }
 
+// 로그아웃 버튼 연결
+function bindLogout(authModule) {
+  const button = $('logout-button');
+  if (!button) return;
+  button.addEventListener('click', async () => {
+    setBusy(button, true);
+    try {
+      await authModule.logout();
+      showToast('로그아웃했어요');
+      // 로그인이 필요한 페이지에 있었다면 홈으로
+      if (isProtectedPage()) window.location.href = 'index.html';
+    } catch (error) {
+      console.error('[layout] 로그아웃 실패', error);
+      showToast('로그아웃하지 못했어요. 다시 시도해 주세요.', { type: 'error' });
+    } finally {
+      setBusy(button, false);
+    }
+  });
+}
+
 // 레이아웃 초기화: 헤더/푸터/템플릿을 불러오고 메뉴 상태를 맞춤
-export async function initLayout() {
+// withAuth: false면 Firebase를 아예 불러오지 않음 (styleguide.html용)
+export async function initLayout({ withAuth = true } = {}) {
   await Promise.all([
     insertPartial('site-header', 'partials/header.html'),
     insertPartial('site-footer', 'partials/footer.html'),
@@ -78,4 +103,14 @@ export async function initLayout() {
   ]);
   markActiveNav();
   renderHeaderUser(null);
+
+  if (!withAuth) return;
+  try {
+    const authModule = await import('./auth.js');
+    authModule.onUserChanged(renderHeaderUser);
+    bindLogout(authModule);
+  } catch (error) {
+    // Firebase SDK를 못 불러와도(오프라인 등) 나머지 화면은 동작하게
+    console.error('[layout] 로그인 모듈을 불러오지 못했어요', error);
+  }
 }

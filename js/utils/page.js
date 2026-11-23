@@ -17,6 +17,14 @@ export const PAGE_FILES = {
 // 로그인 후 돌아가도 되는 페이지 (login.html 자신은 제외)
 const NEXT_ALLOWED = ['index', 'recommend', 'playlists', 'playlist', 'ratings'];
 
+// 로그인이 필요한 페이지 (data-page 값)
+export const PROTECTED_PAGES = ['playlists', 'playlist', 'ratings'];
+
+// 지금 페이지가 로그인 필요 페이지인지
+export function isProtectedPage(page = getCurrentPage()) {
+  return PROTECTED_PAGES.includes(page);
+}
+
 // 현재 페이지 이름 (body의 data-page)
 export function getCurrentPage() {
   return document.body.dataset.page || 'home';
