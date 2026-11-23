@@ -187,12 +187,12 @@ tracks/{trackKey}/ratings/{uid}      { score, updatedAt }
 4. 브라우저 개발자 도구(F12)의 기기 모드로 360px 폭도 확인하세요.
 
 ### 브랜치를 만들고 PR 올리는 법
-1. `main`에 바로 올리지 말고 브랜치를 만듭니다. 이름 예: `design/영서-버튼`, `design/대욱-카드`
+1. `main`에 바로 올리지 말고 브랜치를 만듭니다. 이름은 영어 소문자로: `design/youngseo-buttons`, `design/daewook-cards`
 2. CSS를 고치고 커밋합니다. 커밋 메시지 예: `style: 추천 카드 모서리와 그림자 조정`
 3. GitHub에서 **Pull Request**를 만들고, 바뀐 화면 스크린샷을 붙입니다.
 4. 개발 담당(신원영)이 확인하고 합칩니다.
 
-> 설치 없이 github.com에서 바로 수정하는 방법 등 자세한 순서는 docs/CONTRIBUTING.md에 정리할 예정입니다.
+> 설치 없이 github.com에서 바로 수정하는 방법(방법 A)과 GitHub Desktop을 쓰는 방법(방법 B)은 **[docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)** 에 화면 순서대로 정리되어 있습니다.
 
 ## 주의: 공개되는 키
 
