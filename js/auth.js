@@ -36,9 +36,10 @@ async function ensureUserDoc(user) {
   const ref = doc(db, 'users', user.uid);
   const snapshot = await getDoc(ref);
   if (snapshot.exists()) return;
+  // 보안 규칙에 맞춰 문자열은 200자까지만 저장 (firestore.rules users 규칙)
   await setDoc(ref, {
-    displayName: user.displayName ?? '',
-    photoURL: user.photoURL ?? '',
+    displayName: String(user.displayName ?? '').slice(0, 200),
+    photoURL: String(user.photoURL ?? '').slice(0, 200),
     createdAt: serverTimestamp(),
   });
 }

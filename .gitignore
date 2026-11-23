@@ -13,3 +13,11 @@ node_modules/
 
 # 로그
 *.log
+
+# Firebase CLI 캐시/디버그 파일
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+firestore-debug.log
+ui-debug.log
+database-debug.log
