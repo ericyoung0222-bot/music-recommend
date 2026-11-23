@@ -468,6 +468,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  min-height: 44px; /* 기능용: 손가락으로 누르기 쉬운 최소 높이 (줄이지 마세요) */
   padding: var(--space-2) var(--space-3);
   cursor: pointer;
 }

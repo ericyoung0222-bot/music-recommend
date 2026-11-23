@@ -131,7 +131,7 @@ function renderSuggestions(tracks) {
   state.activeIndex = -1;
   const items = tracks.map((track, index) => renderSuggestion(track, {
     id: `suggestion-${index}`,
-    onSelect: () => selectSuggestion(index),
+    onSelect: (_track, { pointerType } = {}) => selectSuggestion(index, { pointerType }),
   }));
   el.suggestions.replaceChildren(...items);
   setSuggestionsOpen(tracks.length > 0);
@@ -153,7 +153,8 @@ function setActiveSuggestion(index) {
 }
 
 // 후보 선택 → 칩 추가
-function selectSuggestion(index) {
+// pointerType이 'touch'/'pen'이면 입력창에 다시 포커스하지 않음 (폰 키보드가 다시 올라오지 않게)
+function selectSuggestion(index, { pointerType = '' } = {}) {
   const track = state.suggestions[index];
   if (!track) return;
   addSeed(track);
@@ -162,7 +163,13 @@ function selectSuggestion(index) {
   setState(el.searchWrap, 'is-loading', false);
   setSuggestionsOpen(false);
   clearStatus(el.searchStatus);
-  if (!el.searchInput.disabled) el.searchInput.focus();
+  const byTouch = pointerType === 'touch' || pointerType === 'pen';
+  if (!byTouch && !el.searchInput.disabled) el.searchInput.focus();
+}
+
+// 검색 영역(입력창 + 후보 목록) 안의 요소인지
+function isInSearchArea(node) {
+  return node instanceof Node && (el.searchWrap.contains(node) || el.suggestions.contains(node));
 }
 
 // 검색 실행 (입력 후 300ms 동안 추가 입력이 없을 때)
@@ -375,7 +382,17 @@ function cacheElements() {
 function bindEvents() {
   el.searchInput.addEventListener('input', handleSearchInput);
   el.searchInput.addEventListener('keydown', handleSearchKeydown);
-  el.searchInput.addEventListener('blur', () => setSuggestionsOpen(false));
+  // 후보 목록 닫기: blur로 닫으면 터치에서 click보다 먼저 닫혀 선택이 안 되므로,
+  // ① 검색 영역 밖을 눌렀을 때 ② 키보드(Tab)로 포커스가 검색 영역 밖으로 나갔을 때만 닫음
+  document.addEventListener('pointerdown', (event) => {
+    if (!isInSearchArea(event.target)) setSuggestionsOpen(false);
+  });
+  [el.searchWrap, el.suggestions].forEach((area) => {
+    area.addEventListener('focusout', (event) => {
+      // relatedTarget이 없으면(빈 곳 터치 등) 위의 pointerdown이 처리하므로 여기서는 닫지 않음
+      if (event.relatedTarget && !isInSearchArea(event.relatedTarget)) setSuggestionsOpen(false);
+    });
+  });
   el.searchInput.addEventListener('focus', () => {
     if (state.suggestions.length && el.searchInput.value.trim()) setSuggestionsOpen(true);
   });
