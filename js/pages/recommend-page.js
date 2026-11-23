@@ -313,7 +313,9 @@ async function runRecommend() {
   try {
     const user = await getUserIfAny();
     const excludeKeys = await getExcludeKeys(user);
-    const { tracks, usedFallback, failedSeeds } = await getRecommendations(state.seeds, { excludeKeys });
+    const {
+      tracks, usedFallback, augmentedSeeds, failedSeeds,
+    } = await getRecommendations(state.seeds, { excludeKeys });
 
     if (!tracks.length) {
       setState(el.resultsSection, 'is-empty', true);
@@ -326,7 +328,9 @@ async function runRecommend() {
 
     clearStatus(el.resultsStatus);
     const notes = [`${tracks.length}곡을 추천해요.`];
-    if (usedFallback) notes.push('비슷한 곡 정보가 적어서 비슷한 가수의 인기곡도 함께 담았어요.');
+    if (usedFallback || augmentedSeeds) {
+      notes.push('Last.fm에 비슷한 곡 정보가 적은 곡이 있어서, 그 가수와 비슷한 가수의 인기곡도 함께 담았어요.');
+    }
     if (failedSeeds) notes.push(`고른 곡 중 ${failedSeeds}곡은 정보를 가져오지 못했어요.`);
     if (excludeKeys.size) notes.push('내가 2점 이하로 평가한 곡은 뺐어요.');
     setText(el.resultsSection, 'results-summary', notes.join(' '));

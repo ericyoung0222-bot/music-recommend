@@ -158,6 +158,7 @@ function normalizeTrack(raw) {
     artist,
     url: String(raw?.url ?? ''),
     image: pickImage(raw?.image),
+    listeners: Number(raw?.listeners) || 0, // 검색 결과 정렬용 (검색 응답에만 있음)
   };
 }
 
@@ -171,11 +172,56 @@ function cleanTracks(tracks) {
   });
 }
 
+// track.search 한 번 호출
+async function searchOnce(params, limit) {
+  const data = await callApiOrEmpty('track.search', { ...params, limit: String(limit) });
+  return toArray(data?.results?.trackmatches?.track).map(normalizeTrack);
+}
+
+// 검색어 비교용: 소문자, 글자·숫자만
+function compact(text) {
+  return String(text ?? '').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
+}
+
 // 곡 검색 (자동완성용, 최대 limit개)
+// - 제목만 입력해도 되고, "곡 제목 가수" / "가수 곡 제목"으로 입력해도 찾음
+//   (예: "아이유 밤편지", "Lemon 米津玄師", "Hype Boy NewJeans", "Blinding Lights The Weeknd")
+// - 앞/뒤 1~2단어를 가수로 가정해 몇 번 더 찾은 뒤,
+//   "검색어에 제목과 가수가 모두 들어 있는 곡" → "청취자 많은 곡" 순으로 정렬
+// - 가장 인기 있는 결과의 1%도 안 되는 청취자 수의 곡(커버·잘못 올라온 곡 등)은 뺌
 export async function searchTracks(query, limit = 8) {
-  const data = await callApiOrEmpty('track.search', { track: query, limit: String(limit) });
-  const raw = toArray(data?.results?.trackmatches?.track);
-  return cleanTracks(raw.map(normalizeTrack)).slice(0, limit);
+  const q = String(query ?? '').trim().replace(/\s+/g, ' ');
+  if (!q) return [];
+  const words = q.split(' ');
+
+  const variants = [{ track: q }];
+  [1, 2].forEach((n) => {
+    if (words.length <= n) return;
+    variants.push({ artist: words.slice(0, n).join(' '), track: words.slice(n).join(' ') });
+    variants.push({ artist: words.slice(-n).join(' '), track: words.slice(0, -n).join(' ') });
+  });
+
+  const results = await Promise.allSettled(variants.map((params) => searchOnce(params, 10)));
+  const ok = results.filter((r) => r.status === 'fulfilled');
+  if (!ok.length) throw results[0].reason;
+
+  const tracks = cleanTracks(ok.flatMap((r) => r.value));
+  if (!tracks.length) return [];
+
+  const qc = compact(q);
+  const matchScore = (t) => {
+    const title = compact(t.title);
+    const artist = compact(t.artist);
+    return (title && qc.includes(title) ? 1 : 0) + (artist && qc.includes(artist) ? 1 : 0);
+  };
+  const maxListeners = Math.max(...tracks.map((t) => t.listeners));
+  const popular = tracks.filter((t) => t.listeners >= maxListeners * 0.01);
+
+  return (popular.length ? popular : tracks)
+    .map((t) => ({ track: t, score: matchScore(t) }))
+    .sort((a, b) => (b.score - a.score) || (b.track.listeners - a.track.listeners))
+    .slice(0, limit)
+    .map(({ track }) => track);
 }
 
 // 비슷한 곡 (match: 0~1 사이 유사도)
