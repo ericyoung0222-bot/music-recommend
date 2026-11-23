@@ -1,0 +1,55 @@
+<!--
+  =====================================================================
+  컴포넌트 템플릿 모음
+  - JS는 이 파일의 <template data-template="이름">을 복사해서 화면에 붙이고,
+    data-js가 붙은 자리에 글자/이미지/링크만 채워 넣습니다.
+  - 디자이너는 class, 태그 구조, 고정 문구를 자유롭게 바꿔도 됩니다.
+  - ⚠️ data-template, data-js, data-score 속성은 지우거나 이름을 바꾸지 마세요.
+  - 각 템플릿의 맨 바깥 요소는 하나만 있어야 합니다.
+  =====================================================================
+-->
+
+<!-- 상태 화면: JS가 is-loading / is-empty / is-error 중 하나를 붙입니다. -->
+<template data-template="status">
+  <div class="status" data-js="status" role="status">
+    <span class="status__icon" aria-hidden="true"></span>
+    <p class="status__message" data-js="status-message"></p>
+    <div class="status__actions">
+      <a class="btn btn--primary btn--small" data-js="status-link" hidden></a>
+      <button class="btn btn--secondary btn--small" type="button" data-js="status-retry" hidden>다시 시도</button>
+    </div>
+  </div>
+</template>
+
+<!-- 토스트 알림: JS가 is-success / is-error를 붙일 수 있습니다. -->
+<template data-template="toast">
+  <div class="toast" data-js="toast">
+    <p class="toast__message" data-js="toast-message"></p>
+    <a class="toast__action" data-js="toast-link" hidden></a>
+    <button class="toast__close" type="button" data-js="toast-close" aria-label="알림 닫기">×</button>
+  </div>
+</template>
+
+<!-- 모달 (dialog 요소) -->
+<template data-template="modal">
+  <dialog class="modal" data-js="modal">
+    <div class="modal__panel">
+      <div class="modal__header">
+        <h2 class="modal__title" data-js="modal-title"></h2>
+        <button class="modal__close" type="button" data-js="modal-close" aria-label="닫기">×</button>
+      </div>
+      <div class="modal__body" data-js="modal-body"></div>
+    </div>
+  </dialog>
+</template>
+
+<!-- 확인 모달의 버튼 영역 (예: 삭제 확인) -->
+<template data-template="confirm-body">
+  <div class="confirm">
+    <p class="confirm__message" data-js="confirm-message"></p>
+    <div class="modal__actions">
+      <button class="btn btn--secondary" type="button" data-js="confirm-cancel">취소</button>
+      <button class="btn btn--danger" type="button" data-js="confirm-ok">확인</button>
+    </div>
+  </div>
+</template>

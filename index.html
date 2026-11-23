@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>곡찾기 · 좋아하는 곡으로 새 음악 추천받기</title>
+  <meta name="description" content="좋아하는 곡 3~5개를 고르면 비슷한 곡을 추천해 주는 음악 추천 & 플레이리스트 서비스">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/home.css">
+  <script type="module" src="js/pages/home-page.js"></script>
+</head>
+<body data-page="home">
+  <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+  <div data-js="site-header"><p class="boot-notice">불러오는 중… 이 문구가 계속 보이면 README의 "로컬에서 실행하기"를 확인하세요.</p></div>
+
+  <main id="main" class="page container" tabindex="-1">
+    <section class="hero">
+      <h1 class="hero__title">좋아하는 곡 3~5개로<br>새로운 음악을 찾아보세요</h1>
+      <p class="hero__desc">고른 곡과 분위기가 비슷한 곡을 Last.fm 데이터로 추천해 드려요. 마음에 드는 곡은 플레이리스트에 담고 별점도 남길 수 있어요.</p>
+      <div class="hero__actions">
+        <a class="btn btn--primary" href="recommend.html">추천 시작하기</a>
+        <a class="btn btn--secondary" href="login.html" data-js="hero-login">구글로 로그인</a>
+      </div>
+    </section>
+
+    <section class="section steps" aria-labelledby="steps-title">
+      <h2 class="section__title" id="steps-title">이렇게 사용해요</h2>
+      <ol class="steps__list">
+        <li class="steps__item">
+          <h3 class="steps__title">1. 곡 고르기</h3>
+          <p class="steps__desc">좋아하는 곡을 검색해서 3~5곡을 골라요.</p>
+        </li>
+        <li class="steps__item">
+          <h3 class="steps__title">2. 추천받기</h3>
+          <p class="steps__desc">고른 곡들과 비슷한 곡을 최대 15곡 추천해 드려요.</p>
+        </li>
+        <li class="steps__item">
+          <h3 class="steps__title">3. 저장하고 평가하기</h3>
+          <p class="steps__desc">로그인하면 플레이리스트에 담고 별점을 남길 수 있어요.</p>
+        </li>
+      </ol>
+    </section>
+  </main>
+
+  <div data-js="site-footer"></div>
+</body>
+</html>

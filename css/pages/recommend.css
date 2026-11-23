@@ -1,0 +1,41 @@
+/* 추천 페이지(recommend.html) 전용 스타일 — 변수만 사용 */
+
+.seed-panel {
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.seed-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.search-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.seed-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.results__summary {
+  margin-bottom: var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+@media (max-width: 480px) {
+  .seed-panel {
+    padding: var(--space-4);
+  }
+  .seed-form__actions .btn {
+    flex: 1;
+  }
+}

@@ -1,0 +1,19 @@
+/* 내 평점 페이지(ratings.html) 전용 스타일 — 변수만 사용 */
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.toolbar__field {
+  min-width: 180px;
+}
+
+.toolbar__count {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}

@@ -1,0 +1,8 @@
+/* 내 플레이리스트 페이지(playlists.html) 전용 스타일 — 변수만 사용 */
+
+.create-form {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}

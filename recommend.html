@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>추천받기 · 곡찾기</title>
+  <meta name="description" content="좋아하는 곡을 골라 비슷한 곡을 추천받으세요">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/recommend.css">
+  <script type="module" src="js/pages/recommend-page.js"></script>
+</head>
+<body data-page="recommend">
+  <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+  <div data-js="site-header"><p class="boot-notice">불러오는 중… 이 문구가 계속 보이면 README의 "로컬에서 실행하기"를 확인하세요.</p></div>
+
+  <main id="main" class="page container" tabindex="-1">
+    <header class="page-header">
+      <h1 class="page-header__title">추천받기</h1>
+      <p class="page-header__desc">좋아하는 곡을 3~5곡 골라 주세요. 곡 이름이나 가수 이름으로 검색할 수 있어요.</p>
+    </header>
+
+    <!-- 설정(API 키)이 없을 때 안내가 뜨는 자리 -->
+    <div class="status-slot" data-js="config-status"></div>
+
+    <section class="seed-panel" aria-labelledby="seed-title">
+      <h2 class="visually-hidden" id="seed-title">곡 고르기</h2>
+      <form class="seed-form" data-js="seed-form" autocomplete="off" novalidate>
+        <div class="search-box">
+          <label class="field__label" for="track-search">곡 검색</label>
+          <div class="search-box__input-wrap" data-js="search-input-wrap">
+            <input class="input" id="track-search" type="search" data-js="search-input"
+              placeholder="예: 아이유 밤편지" maxlength="100"
+              role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="track-suggestions">
+          </div>
+          <ul class="suggestions" id="track-suggestions" data-js="suggestions" role="listbox" aria-label="검색 결과" hidden></ul>
+          <div class="status-slot status-slot--compact" data-js="search-status"></div>
+        </div>
+
+        <p class="field__hint seed-form__count" data-js="seed-count" aria-live="polite">0 / 5곡 선택 (최소 3곡)</p>
+        <ul class="chip-list" data-js="seed-list" aria-label="선택한 곡"></ul>
+
+        <div class="seed-form__actions">
+          <button class="btn btn--primary" type="submit" data-js="recommend-submit" disabled>추천받기</button>
+          <button class="btn btn--ghost" type="button" data-js="seed-reset">모두 지우기</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="section results" data-js="results-section" aria-labelledby="results-title" hidden>
+      <h2 class="section__title" id="results-title">추천 결과</h2>
+      <p class="results__summary" data-js="results-summary"></p>
+      <div class="status-slot" data-js="results-status"></div>
+      <ul class="card-grid" data-js="results-list"></ul>
+    </section>
+  </main>
+
+  <div data-js="site-footer"></div>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!--
+  공통 헤더: 모든 페이지의 [data-js="site-header"] 자리에 js/layout.js가 끼워 넣습니다.
+  - class, 태그 순서, 문구는 자유롭게 바꿔도 됩니다.
+  - data-js, data-page 속성은 기능에 필요하므로 지우거나 바꾸지 마세요.
+  - 링크는 상대 경로(index.html 등)로 유지하세요. (GitHub Pages 하위 경로 대응)
+-->
+<header class="site-header">
+  <div class="site-header__inner container">
+    <a class="site-header__logo" href="index.html">
+      <img class="site-header__logo-img" src="assets/logo.svg" alt="" width="32" height="32">
+      <span class="site-header__logo-text">곡찾기</span>
+    </a>
+
+    <nav class="site-nav" aria-label="주 메뉴">
+      <ul class="site-nav__list">
+        <li><a class="site-nav__link" href="index.html" data-js="nav-link" data-page="home">홈</a></li>
+        <li><a class="site-nav__link" href="recommend.html" data-js="nav-link" data-page="recommend">추천받기</a></li>
+        <li><a class="site-nav__link" href="playlists.html" data-js="nav-link" data-page="playlists">내 플레이리스트</a></li>
+        <li><a class="site-nav__link" href="ratings.html" data-js="nav-link" data-page="ratings">내 평점</a></li>
+      </ul>
+
+      <div class="site-header__auth">
+        <!-- 로그아웃 상태에서 보이는 로그인 버튼 -->
+        <a class="btn btn--primary btn--small" href="login.html" data-js="login-link">로그인</a>
+
+        <!-- 로그인 상태에서 보이는 프로필 + 로그아웃 -->
+        <div class="user-menu" data-js="user-menu" hidden>
+          <img class="user-menu__avatar" data-js="user-avatar" src="assets/default-avatar.svg" alt="" width="32" height="32">
+          <span class="user-menu__name" data-js="user-name"></span>
+          <button class="btn btn--ghost btn--small" type="button" data-js="logout-button">로그아웃</button>
+        </div>
+      </div>
+    </nav>
+  </div>
+</header>

@@ -1,0 +1,81 @@
+// =====================================================================
+// 공통 레이아웃: 헤더/푸터 끼워 넣기, 현재 메뉴 표시, 로그인 상태에 따라 메뉴 전환
+// 모든 페이지 스크립트는 맨 처음에 await initLayout()을 호출합니다.
+// =====================================================================
+
+import { $, $$, setText, safeUrl } from './utils/dom.js';
+import { buildLoginUrl, getCurrentPage } from './utils/page.js';
+import { loadTemplates } from './components/templates.js';
+
+const DEFAULT_AVATAR = 'assets/default-avatar.svg';
+
+// 파일 내용을 글자로 가져오기
+async function fetchText(path) {
+  const response = await fetch(path);
+  if (!response.ok) throw new Error(`${path}을(를) 불러오지 못했어요 (${response.status})`);
+  return response.text();
+}
+
+// data-js 자리(slot)를 partials 파일 내용으로 교체
+async function insertPartial(slotName, path) {
+  const slot = $(slotName);
+  if (!slot) return;
+  try {
+    const html = await fetchText(path); // 우리 사이트의 고정 파일이라 그대로 넣어도 안전
+    const template = document.createElement('template');
+    template.innerHTML = html;
+    slot.replaceWith(template.content);
+  } catch (error) {
+    console.error(error);
+    slot.textContent = '화면 일부를 불러오지 못했어요. 새로고침해 주세요.';
+  }
+}
+
+// 현재 페이지 메뉴에 is-active와 aria-current 표시
+function markActiveNav() {
+  const page = getCurrentPage();
+  $$('nav-link').forEach((link) => {
+    const active = link.dataset.page === page;
+    link.classList.toggle('is-active', active);
+    if (active) link.setAttribute('aria-current', 'page');
+    else link.removeAttribute('aria-current');
+  });
+}
+
+// 로그인 상태에 맞게 헤더 바꾸기 (user가 null이면 로그아웃 상태)
+export function renderHeaderUser(user) {
+  document.body.classList.toggle('is-logged-in', Boolean(user));
+
+  const loginLink = $('login-link');
+  if (loginLink) {
+    loginLink.hidden = Boolean(user);
+    // 로그인 페이지에서는 next를 붙이지 않음
+    loginLink.href = getCurrentPage() === 'login' ? 'login.html' : buildLoginUrl();
+  }
+
+  const menu = $('user-menu');
+  if (!menu) return;
+  menu.hidden = !user;
+  if (!user) return;
+
+  const name = user.displayName || '사용자';
+  setText(menu, 'user-name', name);
+  const avatar = $('user-avatar', menu);
+  if (avatar) {
+    avatar.alt = `${name} 프로필 사진`;
+    avatar.referrerPolicy = 'no-referrer'; // 구글 프로필 사진이 가끔 리퍼러 때문에 막히는 문제 방지
+    avatar.src = safeUrl(user.photoURL) || DEFAULT_AVATAR;
+    avatar.addEventListener('error', () => { avatar.src = DEFAULT_AVATAR; }, { once: true });
+  }
+}
+
+// 레이아웃 초기화: 헤더/푸터/템플릿을 불러오고 메뉴 상태를 맞춤
+export async function initLayout() {
+  await Promise.all([
+    insertPartial('site-header', 'partials/header.html'),
+    insertPartial('site-footer', 'partials/footer.html'),
+    loadTemplates(),
+  ]);
+  markActiveNav();
+  renderHeaderUser(null);
+}

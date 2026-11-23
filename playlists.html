@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>내 플레이리스트 · 곡찾기</title>
+  <meta name="description" content="내가 만든 플레이리스트 목록">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/playlists.css">
+  <script type="module" src="js/pages/playlists-page.js"></script>
+</head>
+<body data-page="playlists">
+  <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+  <div data-js="site-header"><p class="boot-notice">불러오는 중… 이 문구가 계속 보이면 README의 "로컬에서 실행하기"를 확인하세요.</p></div>
+
+  <main id="main" class="page container" tabindex="-1">
+    <!-- 로그인 확인 중 / 설정 필요 안내가 뜨는 자리 -->
+    <div class="status-slot" data-js="page-status"></div>
+
+    <!-- 로그인이 확인되면 보이는 본문 -->
+    <div data-js="page-content" hidden>
+      <header class="page-header">
+        <h1 class="page-header__title">내 플레이리스트</h1>
+        <p class="page-header__desc">추천받은 곡을 모아 두는 곳이에요. 플레이리스트 하나에 최대 200곡까지 담을 수 있어요.</p>
+      </header>
+
+      <form class="create-form form-row" data-js="playlist-create-form" novalidate>
+        <label class="field">
+          <span class="field__label">새 플레이리스트</span>
+          <input class="input" type="text" data-js="playlist-create-input" maxlength="50" required placeholder="예: 비 오는 날 듣는 곡">
+        </label>
+        <button class="btn btn--primary" type="submit" data-js="playlist-create-submit">만들기</button>
+      </form>
+
+      <section class="section" aria-labelledby="playlist-list-title">
+        <h2 class="visually-hidden" id="playlist-list-title">플레이리스트 목록</h2>
+        <div class="status-slot" data-js="playlists-status"></div>
+        <ul class="playlist-list" data-js="playlist-list"></ul>
+      </section>
+    </div>
+  </main>
+
+  <div data-js="site-footer"></div>
+</body>
+</html>

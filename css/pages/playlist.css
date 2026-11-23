@@ -1,0 +1,30 @@
+/* 플레이리스트 상세 페이지(playlist.html) 전용 스타일 — 변수만 사용 */
+
+.back-link {
+  display: inline-block;
+  margin-bottom: var(--space-4);
+  font-size: var(--font-size-sm);
+}
+
+.playlist-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.playlist-header .page-header__title {
+  word-break: break-word;
+}
+
+.playlist-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.rename-form {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}

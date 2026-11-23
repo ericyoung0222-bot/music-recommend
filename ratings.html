@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>내 평점 · 곡찾기</title>
+  <meta name="description" content="내가 별점을 남긴 곡 목록">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/ratings.css">
+  <script type="module" src="js/pages/ratings-page.js"></script>
+</head>
+<body data-page="ratings">
+  <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+  <div data-js="site-header"><p class="boot-notice">불러오는 중… 이 문구가 계속 보이면 README의 "로컬에서 실행하기"를 확인하세요.</p></div>
+
+  <main id="main" class="page container" tabindex="-1">
+    <div class="status-slot" data-js="page-status"></div>
+
+    <div data-js="page-content" hidden>
+      <header class="page-header">
+        <h1 class="page-header__title">내 평점</h1>
+        <p class="page-header__desc">내가 별점을 남긴 곡이에요. 별을 눌러 점수를 바꾸거나 평점을 삭제할 수 있어요.</p>
+      </header>
+
+      <div class="toolbar">
+        <label class="field toolbar__field">
+          <span class="field__label">정렬</span>
+          <select class="select" data-js="ratings-sort">
+            <option value="recent">최신순</option>
+            <option value="score">점수 높은 순</option>
+          </select>
+        </label>
+        <p class="toolbar__count" data-js="ratings-count" aria-live="polite"></p>
+      </div>
+
+      <section aria-labelledby="ratings-list-title">
+        <h2 class="visually-hidden" id="ratings-list-title">평가한 곡 목록</h2>
+        <div class="status-slot" data-js="ratings-status"></div>
+        <ul class="card-grid" data-js="ratings-list"></ul>
+      </section>
+    </div>
+  </main>
+
+  <div data-js="site-footer"></div>
+</body>
+</html>

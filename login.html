@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>로그인 · 곡찾기</title>
+  <meta name="description" content="구글 계정으로 로그인하고 플레이리스트와 별점을 저장하세요">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/login.css">
+  <script type="module" src="js/pages/login-page.js"></script>
+</head>
+<body data-page="login">
+  <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+  <div data-js="site-header"><p class="boot-notice">불러오는 중… 이 문구가 계속 보이면 README의 "로컬에서 실행하기"를 확인하세요.</p></div>
+
+  <main id="main" class="page container" tabindex="-1">
+    <section class="login-panel" aria-labelledby="login-title">
+      <h1 class="login-panel__title" id="login-title">로그인</h1>
+      <p class="login-panel__desc">구글 계정으로 로그인하면 추천곡을 플레이리스트에 저장하고 별점을 남길 수 있어요.</p>
+
+      <!-- 카카오톡 등 앱 안 브라우저일 때만 보이는 안내 -->
+      <div class="notice" data-js="inapp-notice" role="note" hidden>
+        <h2 class="notice__title">앱 안의 브라우저에서는 구글 로그인이 막혀 있어요</h2>
+        <p class="notice__text">카카오톡·인스타그램 같은 앱 안에서 열린 화면에서는 Google이 로그인을 막아요. Chrome이나 Safari에서 이 주소를 열어 주세요.</p>
+        <div class="notice__actions">
+          <a class="btn btn--primary btn--small" data-js="open-external" hidden>기본 브라우저로 열기</a>
+          <button class="btn btn--secondary btn--small" type="button" data-js="copy-url">주소 복사</button>
+        </div>
+      </div>
+
+      <div class="status-slot" data-js="login-status"></div>
+
+      <button class="btn btn--primary btn--block login-panel__google" type="button" data-js="google-login">Google로 로그인</button>
+
+      <p class="login-panel__note">로그인하지 않아도 추천은 받을 수 있어요. <a href="recommend.html">추천받기로 가기</a></p>
+    </section>
+  </main>
+
+  <div data-js="site-footer"></div>
+</body>
+</html>

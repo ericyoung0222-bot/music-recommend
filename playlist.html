@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>플레이리스트 · 곡찾기</title>
+  <meta name="description" content="플레이리스트 상세">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/playlist.css">
+  <script type="module" src="js/pages/playlist-page.js"></script>
+</head>
+<body data-page="playlist">
+  <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+  <div data-js="site-header"><p class="boot-notice">불러오는 중… 이 문구가 계속 보이면 README의 "로컬에서 실행하기"를 확인하세요.</p></div>
+
+  <main id="main" class="page container" tabindex="-1">
+    <a class="back-link" href="playlists.html">← 내 플레이리스트</a>
+
+    <div class="status-slot" data-js="page-status"></div>
+
+    <div data-js="page-content" hidden>
+      <header class="page-header playlist-header">
+        <h1 class="page-header__title" data-js="playlist-title"></h1>
+        <p class="page-header__desc" data-js="playlist-meta"></p>
+
+        <div class="playlist-header__actions">
+          <button class="btn btn--secondary btn--small" type="button" data-js="rename-open">이름 바꾸기</button>
+          <button class="btn btn--danger btn--small" type="button" data-js="playlist-delete">플레이리스트 삭제</button>
+        </div>
+
+        <form class="rename-form form-row" data-js="rename-form" novalidate hidden>
+          <label class="field">
+            <span class="field__label">새 이름</span>
+            <input class="input" type="text" data-js="rename-input" maxlength="50" required>
+          </label>
+          <button class="btn btn--primary btn--small" type="submit" data-js="rename-submit">저장</button>
+          <button class="btn btn--ghost btn--small" type="button" data-js="rename-cancel">취소</button>
+        </form>
+      </header>
+
+      <section aria-labelledby="track-list-title">
+        <h2 class="visually-hidden" id="track-list-title">곡 목록</h2>
+        <div class="status-slot" data-js="tracks-status"></div>
+        <ul class="card-grid" data-js="track-list"></ul>
+      </section>
+    </div>
+  </main>
+
+  <div data-js="site-footer"></div>
+</body>
+</html>
