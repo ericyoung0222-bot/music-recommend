@@ -219,12 +219,12 @@ PR을 만든 뒤 다른 파일도 같은 작업에 포함하고 싶으면, **같
 3. 아래를 입력하고 Enter.
 
    ```powershell
-   npx serve .
+   npx serve . -l 5173
    ```
 
    처음에 `Ok to proceed? (y)` 가 나오면 `y` 를 입력하고 Enter.
-   - "이 시스템에서 스크립트를 실행할 수 없으므로" 라는 빨간 오류가 나오면 `npx.cmd serve .` 로 입력하거나, 방법 ①을 쓰세요.
-4. 브라우저에서 `http://localhost:3000/styleguide.html` 을 엽니다.
+   - "이 시스템에서 스크립트를 실행할 수 없으므로" 라는 빨간 오류가 나오면 `npx.cmd serve . -l 5173` 로 입력하거나, 방법 ①을 쓰세요.
+4. 브라우저에서 `http://localhost:5173/styleguide.html` 을 엽니다.
 5. 다 쓰면 터미널에서 `Ctrl + C` 로 끕니다.
 
 #### 360px(작은 휴대폰) 화면 확인
@@ -235,7 +235,7 @@ PR을 만든 뒤 다른 파일도 같은 작업에 포함하고 싶으면, **같
 
 #### styleguide.html 섹션 바로가기
 
-주소 뒤에 아래를 붙이면 그 부분으로 바로 갑니다. 예: `http://localhost:3000/styleguide.html#sg-buttons`
+주소 뒤에 아래를 붙이면 그 부분으로 바로 갑니다. 예: `http://localhost:5173/styleguide.html#sg-buttons`
 
 | 주소 뒤에 붙일 것 | 보이는 것 | 주로 관련된 파일 |
 |---|---|---|
@@ -464,7 +464,7 @@ style: 로고 이미지 교체
 | 증상 | 해결 |
 |---|---|
 | 파일을 더블클릭해서 열었더니 "불러오는 중…"에서 멈춤 | 로컬 서버로 여세요. ([5-5](#5-5-고친-화면-미리-보기)) |
-| `npx serve .` 를 쳤더니 "스크립트를 실행할 수 없으므로" 오류 | `npx.cmd serve .` 로 입력하거나 Live Server(방법 ①)를 쓰세요. |
+| `npx serve . -l 5173` 을 쳤더니 "스크립트를 실행할 수 없으므로" 오류 | `npx.cmd serve . -l 5173` 로 입력하거나 Live Server(방법 ①)를 쓰세요. |
 | CSS를 고쳤는데 화면이 그대로 | `Ctrl + S` 로 저장했는지, 브라우저에서 `Ctrl + Shift + R` (강력 새로고침) 해 보세요. |
 | 로그인이 필요한 페이지(플레이리스트, 내 평점)가 안 보임 | 정상입니다. 그 부품들은 `styleguide.html` 의 `#sg-playlists`, `#sg-cards`, `#sg-stars` 에서 확인하세요. |
 | GitHub Desktop에 `js/` 파일이 바뀌었다고 나옴 | 그 파일 체크를 해제하고 오른쪽 클릭 → **(Discard changes...)** 로 되돌린 뒤 신원영에게 알려 주세요. |

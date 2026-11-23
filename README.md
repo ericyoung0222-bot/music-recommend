@@ -101,10 +101,12 @@ ES Modules는 파일을 더블클릭해서(`file://`) 열면 동작하지 않습
 2. 이 폴더에서 터미널(PowerShell)을 열고 실행합니다.
 
    ```powershell
-   npx serve .
+   npx serve . -l 5173
    ```
 
-3. 터미널에 나온 주소(보통 `http://localhost:3000`)를 브라우저로 엽니다.
+3. `http://localhost:5173` 을 브라우저로 엽니다.
+
+> **포트는 5173으로 쓰세요.** Firebase API 키에 리퍼러 제한이 걸려 있어서 `http://localhost:5173`에서만 로그인·저장이 됩니다. (추천·스타일 가이드는 다른 포트에서도 동작)
 
 > 폴더의 `serve.json`은 `serve`가 주소의 `.html`을 지우면서 `?id=` 같은 값까지 날려 버리는 것을 막아 줍니다. 지우지 마세요.
 > VS Code의 "Live Server" 확장으로 열어도 됩니다.
@@ -155,10 +157,13 @@ ES Modules는 파일을 더블클릭해서(`file://`) 열면 동작하지 않습
 
 | 경로 | 읽기 | 쓰기 |
 |---|---|---|
-| `users/{uid}`, `users/{uid}/playlists/*` | 본인만 | 본인만 |
+| `users/{uid}` | 본인만 | 처음 로그인할 때 만들기만 (필드 3개 고정, 수정·삭제 불가) |
+| `users/{uid}/playlists/*` | 본인만 | 본인만, 필드 4개 고정, 이름 1~50자, 곡 200개 이하, 새로 담는 곡 형식 검사, 시각은 서버 시각만 |
 | `users/{uid}/ratings/{trackKey}` | 본인만 | 본인만, score는 1~5 정수, 허용 필드(score, title, artist, image, url, updatedAt)만 |
 | `tracks/{trackKey}/ratings/{uid}` | 누구나 (평균 계산용) | 문서 ID가 본인 uid일 때만, score는 1~5 정수, 허용 필드(score, updatedAt)만 |
 | 그 외 모든 경로 | 거부 | 거부 |
+
+자세한 조건, 코드와의 대조표, 테스트 결과, 남은 한계는 [docs/SECURITY.md](docs/SECURITY.md)에 정리했습니다.
 
 ### 6) 승인된 도메인 추가 (배포 후 로그인에 필요)
 1. Authentication → **설정** 탭 → **승인된 도메인** → **도메인 추가**
@@ -196,7 +201,7 @@ tracks/{trackKey}/ratings/{uid}      { score, updatedAt }
 
 ### styleguide.html로 확인하는 법
 1. 로컬 서버를 켭니다. ([로컬에서 실행하기](#로컬에서-실행하기))
-2. `http://localhost:3000/styleguide.html`을 엽니다.
+2. `http://localhost:5173/styleguide.html`을 엽니다.
 3. 버튼, 카드, 별점, 로딩/빈 화면/에러, 토스트, 모달 등이 모두 가짜 데이터로 보입니다. 로그인이나 API 키가 없어도 됩니다.
 4. 브라우저 개발자 도구(F12)의 기기 모드로 360px 폭도 확인하세요.
 
@@ -218,7 +223,7 @@ tracks/{trackKey}/ratings/{uid}      { score, updatedAt }
 
 | 증상 | 원인 / 해결 |
 |---|---|
-| "불러오는 중…"에서 멈춤, 헤더가 안 보임 | 파일을 더블클릭해서 연 경우입니다. `npx serve .`로 여세요. |
+| "불러오는 중…"에서 멈춤, 헤더가 안 보임 | 파일을 더블클릭해서 연 경우입니다. `npx serve . -l 5173`으로 여세요. |
 | 추천 화면에 "Last.fm API 키가 아직 설정되지 않았어요" | `js/config.js`의 `LASTFM_API_KEY`를 넣으세요. |
 | "Last.fm API 키가 올바르지 않아요" | 키를 잘못 복사했습니다. 앞뒤 공백 없이 다시 넣으세요. |
 | 로그인 시 "승인된 도메인에 등록되지 않았어요" | Firebase 승인된 도메인에 지금 주소의 도메인을 추가하세요. |
