@@ -7,16 +7,16 @@
 // =====================================================================
 
 // Last.fm API 키 (https://www.last.fm/api/account/create 에서 발급)
-export const LASTFM_API_KEY = 'YOUR_LASTFM_API_KEY';
+export const LASTFM_API_KEY = '523a90d74c723e99d928dff5ad26cb50';
 
 // Firebase 콘솔 → 프로젝트 설정 → 내 앱 → SDK 설정 및 구성 → "구성"에 있는 값
 export const firebaseConfig = {
-  apiKey: 'YOUR_FIREBASE_API_KEY',
-  authDomain: 'YOUR_PROJECT_ID.firebaseapp.com',
-  projectId: 'YOUR_PROJECT_ID',
-  storageBucket: 'YOUR_PROJECT_ID.firebasestorage.app',
-  messagingSenderId: 'YOUR_SENDER_ID',
-  appId: 'YOUR_APP_ID',
+  apiKey: 'AIzaSyASOvpKO01Jds5sfS_jesOZvy2OMWPOPxA',
+  authDomain: 'my-friend-claude.firebaseapp.com',
+  projectId: 'my-friend-claude',
+  storageBucket: 'my-friend-claude.firebasestorage.app',
+  messagingSenderId: '75165994287',
+  appId: '1:75165994287:web:49741b0ec452e412ac65da',
 };
 
 // 값이 아직 자리표시자인지 검사 (자리표시자면 기능 대신 "설정 필요" 안내를 보여줌)
