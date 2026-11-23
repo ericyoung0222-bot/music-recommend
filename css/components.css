@@ -534,6 +534,12 @@
   color: var(--color-star);
 }
 
+/* 마우스를 올린 별까지 미리 보기 */
+.star-rating__star.is-active {
+  color: var(--color-star);
+  opacity: 0.7;
+}
+
 .star-rating__star:hover {
   transform: scale(1.15);
 }

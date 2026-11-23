@@ -86,6 +86,26 @@
   </li>
 </template>
 
+<!-- 별점: 별 5개 버튼 (data-score 1~5는 지우지 마세요)
+     - 내 점수 이하의 별에 is-selected, 마우스를 올린 별까지 is-active
+     - 평균 불러오는 중 is-loading, 저장 중 is-disabled -->
+<template data-template="star-rating">
+  <div class="star-rating" data-js="star-rating">
+    <div class="star-rating__stars" role="group" data-js="star-group" aria-label="별점 주기">
+      <button class="star-rating__star" type="button" data-js="star" data-score="1">★</button>
+      <button class="star-rating__star" type="button" data-js="star" data-score="2">★</button>
+      <button class="star-rating__star" type="button" data-js="star" data-score="3">★</button>
+      <button class="star-rating__star" type="button" data-js="star" data-score="4">★</button>
+      <button class="star-rating__star" type="button" data-js="star" data-score="5">★</button>
+    </div>
+    <p class="star-rating__summary">
+      <span class="star-rating__mine" data-js="star-mine"></span>
+      <span class="star-rating__average" data-js="star-average"></span>
+    </p>
+    <button class="star-rating__clear" type="button" data-js="star-clear" hidden>평점 삭제</button>
+  </div>
+</template>
+
 <!-- 플레이리스트 카드 (내 플레이리스트 목록 페이지) -->
 <template data-template="playlist-card">
   <li class="playlist-list__item">
