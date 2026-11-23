@@ -1,0 +1,55 @@
+rules_version = '2';
+
+// =====================================================================
+// Firestore 보안 규칙
+// Firebase 콘솔 → Firestore Database → 규칙(Rules) 탭에 이 파일 내용을 그대로 붙여넣고 "게시"하세요.
+// 아래에 적히지 않은 경로는 모두 거부됩니다.
+// =====================================================================
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 로그인한 본인인지
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // 점수가 1~5 정수인지
+    function isValidScore(score) {
+      return score is int && score >= 1 && score <= 5;
+    }
+
+    // 저장하려는 문서의 필드가 허용 목록 안에만 있고, 필수 필드는 모두 있는지
+    function hasOnlyFields(allowed, required) {
+      return request.resource.data.keys().hasOnly(allowed)
+        && request.resource.data.keys().hasAll(required);
+    }
+
+    // ---------- 사용자 문서: 본인만 읽고 쓰기 ----------
+    match /users/{uid} {
+      allow read, write: if isOwner(uid);
+
+      // 내 플레이리스트: 본인만
+      match /playlists/{playlistId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      // 내 평점: 본인만, score는 1~5 정수, 허용된 필드만
+      match /ratings/{trackKey} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && hasOnlyFields(['score', 'title', 'artist', 'image', 'url', 'updatedAt'], ['score', 'updatedAt'])
+          && isValidScore(request.resource.data.score);
+      }
+    }
+
+    // ---------- 곡별 평점 (평균 계산용) ----------
+    // 읽기는 누구나 (평균/인원 표시), 쓰기와 삭제는 문서 ID(uid)가 본인일 때만
+    match /tracks/{trackKey}/ratings/{uid} {
+      allow read: if true;
+      allow delete: if isOwner(uid);
+      allow create, update: if isOwner(uid)
+        && hasOnlyFields(['score', 'updatedAt'], ['score', 'updatedAt'])
+        && isValidScore(request.resource.data.score);
+    }
+  }
+}
