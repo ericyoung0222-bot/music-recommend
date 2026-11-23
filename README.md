@@ -4,7 +4,8 @@
 
 - 개발 총괄: 신원영
 - CSS 디자인: 김영서, 김대욱
-- 배포 주소: `https://[깃허브아이디].github.io/[레포이름]/`
+- 배포 주소: https://ericyoung0222-bot.github.io/music-recommend/
+- 저장소: https://github.com/ericyoung0222-bot/music-recommend
 
 ## 목차
 
@@ -147,7 +148,7 @@ ES Modules는 파일을 더블클릭해서(`file://`) 열면 동작하지 않습
 
 ### 6) 승인된 도메인 추가 (배포 후 로그인에 필요)
 1. Authentication → **설정** 탭 → **승인된 도메인** → **도메인 추가**
-2. `[깃허브아이디].github.io` 를 추가합니다. (`localhost`는 처음부터 들어 있습니다.)
+2. `ericyoung0222-bot.github.io` 를 추가합니다. (`localhost`는 처음부터 들어 있습니다.)
 
 ### Firestore 데이터 구조
 
@@ -165,8 +166,8 @@ tracks/{trackKey}/ratings/{uid}      { score, updatedAt }
 1. GitHub에 **공개(public)** 저장소를 만들고 코드를 `main` 브랜치에 올립니다. (무료 계정은 공개 저장소만 Pages 가능)
 2. 저장소 **Settings → Pages**
 3. **Source: Deploy from a branch**, **Branch: `main` / `/ (root)`** → **Save**
-4. 1~2분 뒤 `https://[깃허브아이디].github.io/[레포이름]/` 에서 열립니다.
-5. Firebase **승인된 도메인**에 `[깃허브아이디].github.io`를 추가했는지 확인합니다. (위 6번)
+4. 1~2분 뒤 https://ericyoung0222-bot.github.io/music-recommend/ 에서 열립니다.
+5. Firebase **승인된 도메인**에 `ericyoung0222-bot.github.io`를 추가했는지 확인합니다. (위 6번)
 
 모든 경로가 상대 경로라서 `/레포이름/` 아래에서도 그대로 동작합니다. `.nojekyll` 파일은 GitHub Pages가 파일을 가공하지 않도록 하는 파일이니 지우지 마세요.
 
