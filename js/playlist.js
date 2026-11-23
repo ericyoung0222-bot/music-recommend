@@ -97,6 +97,18 @@ export async function createPlaylist(uid, name) {
   return ref.id;
 }
 
+// 새 플레이리스트를 곡 하나가 담긴 상태로 만들기 → 새 ID 반환
+// (만들기와 담기를 한 번의 쓰기로 처리해서, 담기에 실패해 빈 플레이리스트만 남는 일이 없음)
+export async function createPlaylistWithTrack(uid, name, track) {
+  const ref = await addDoc(playlistsRef(uid), {
+    name: normalizeName(name),
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    tracks: [toStoredTrack(track)],
+  });
+  return ref.id;
+}
+
 // 이름 바꾸기
 export async function renamePlaylist(uid, playlistId, name) {
   const clean = normalizeName(name);

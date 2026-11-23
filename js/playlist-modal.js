@@ -5,7 +5,7 @@
 
 import { getCurrentUser } from './auth.js';
 import {
-  listPlaylists, createPlaylist, addTrackToPlaylist, getPlaylistErrorMessage,
+  listPlaylists, createPlaylistWithTrack, addTrackToPlaylist, normalizeName, getPlaylistErrorMessage,
 } from './playlist.js';
 import { buildLoginUrl } from './utils/page.js';
 import { openModal } from './components/modal.js';
@@ -57,9 +57,8 @@ export async function openAddToPlaylistModal(track) {
       done(playlist.id, playlist.name);
     }),
     onCreate: (name) => runOnce(async () => {
-      const id = await createPlaylist(user.uid, name);
-      const cleanName = String(name).trim().replace(/\s+/g, ' ');
-      await addTrackToPlaylist(user.uid, id, track);
+      const cleanName = normalizeName(name); // 이름이 비었거나 너무 길면 여기서 에러 → 모달 안에 안내
+      const id = await createPlaylistWithTrack(user.uid, cleanName, track);
       picker.resetForm();
       done(id, cleanName);
     }),
