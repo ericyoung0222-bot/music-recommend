@@ -18,7 +18,7 @@
   <main id="main" class="page container" tabindex="-1">
     <header class="page-header">
       <h1 class="page-header__title">추천받기</h1>
-      <p class="page-header__desc">좋아하는 곡을 3~5곡 골라 주세요. 곡 이름이나 가수 이름으로 검색할 수 있어요.</p>
+      <p class="page-header__desc">좋아하는 곡을 3~5곡 골라 주세요. 곡 제목으로 검색하면 후보가 나와요.</p>
     </header>
 
     <!-- 설정(API 키)이 없을 때 안내가 뜨는 자리 -->
@@ -31,7 +31,7 @@
           <label class="field__label" for="track-search">곡 검색</label>
           <div class="search-box__input-wrap" data-js="search-input-wrap">
             <input class="input" id="track-search" type="search" data-js="search-input"
-              placeholder="예: 아이유 밤편지" maxlength="100"
+              placeholder="곡 제목을 입력하세요 (예: 밤편지)" maxlength="100"
               role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="track-suggestions">
           </div>
           <ul class="suggestions" id="track-suggestions" data-js="suggestions" role="listbox" aria-label="검색 결과" hidden></ul>

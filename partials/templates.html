@@ -43,6 +43,49 @@
   </dialog>
 </template>
 
+<!-- 곡 카드: 추천 결과, 플레이리스트 상세, 내 평점에서 같이 씁니다.
+     필요 없는 버튼(card-add / card-remove)은 JS가 페이지에 맞게 지웁니다. -->
+<template data-template="track-card">
+  <li class="card-grid__item">
+    <article class="card">
+      <img class="card__image" data-js="card-image" src="assets/default-album.svg" alt="" width="300" height="300" loading="lazy">
+      <div class="card__body">
+        <h3 class="card__title" data-js="card-title"></h3>
+        <p class="card__subtitle" data-js="card-artist"></p>
+        <p class="card__meta" data-js="card-meta" hidden></p>
+        <p class="card__links">
+          <a class="card__link" data-js="card-lastfm-link" target="_blank" rel="noopener noreferrer">Last.fm</a>
+          <a class="card__link" data-js="card-youtube-link" target="_blank" rel="noopener noreferrer">YouTube에서 찾기</a>
+        </p>
+        <div class="card__rating" data-js="card-rating"></div>
+        <div class="card__actions">
+          <button class="btn btn--primary btn--small" type="button" data-js="card-add">플레이리스트에 추가</button>
+          <button class="btn btn--secondary btn--small" type="button" data-js="card-remove">목록에서 빼기</button>
+        </div>
+      </div>
+    </article>
+  </li>
+</template>
+
+<!-- 곡 검색 자동완성 후보 한 줄: 키보드로 고르면 JS가 is-active를 붙입니다. -->
+<template data-template="suggestion">
+  <li class="suggestion" data-js="suggestion" role="option" aria-selected="false">
+    <img class="suggestion__image" data-js="suggestion-image" src="assets/default-album.svg" alt="" width="40" height="40">
+    <span class="suggestion__text">
+      <span class="suggestion__title" data-js="suggestion-title"></span>
+      <span class="suggestion__artist" data-js="suggestion-artist"></span>
+    </span>
+  </li>
+</template>
+
+<!-- 선택한 곡 칩 -->
+<template data-template="chip">
+  <li class="chip" data-js="chip">
+    <span class="chip__label" data-js="chip-label"></span>
+    <button class="chip__remove" type="button" data-js="chip-remove" aria-label="선택 취소">×</button>
+  </li>
+</template>
+
 <!-- 확인 모달의 버튼 영역 (예: 삭제 확인) -->
 <template data-template="confirm-body">
   <div class="confirm">
