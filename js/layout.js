@@ -93,24 +93,59 @@ function bindLogout(authModule) {
   });
 }
 
+// 페이지를 시작할 수 없을 때 화면 맨 위에 안내 (템플릿이 없으므로 직접 만듦)
+function showBootError(message) {
+  const notice = document.createElement('p');
+  notice.className = 'boot-notice';
+  notice.setAttribute('role', 'alert');
+  notice.textContent = message;
+  document.body.prepend(notice);
+}
+
+// 토스트 자리가 없으면 만들어 둠
+// (푸터를 못 불러왔거나 디자인 수정 중 data-js="toast-region"이 빠져도 알림이 사라지지 않게)
+function ensureToastRegion() {
+  if ($('toast-region')) return;
+  const region = document.createElement('div');
+  region.className = 'toast-region';
+  region.dataset.js = 'toast-region';
+  region.setAttribute('aria-live', 'polite');
+  document.body.append(region);
+}
+
 // 레이아웃 초기화: 헤더/푸터/템플릿을 불러오고 메뉴 상태를 맞춤
 // withAuth: false면 Firebase를 아예 불러오지 않음 (styleguide.html용)
 export async function initLayout({ withAuth = true } = {}) {
   await Promise.all([
     insertPartial('site-header', 'partials/header.html'),
     insertPartial('site-footer', 'partials/footer.html'),
-    loadTemplates(),
+    // 화면 부품 파일은 한 번 더 시도하고, 그래도 안 되면 화면 맨 위에 안내 (조용히 멈추지 않게)
+    loadTemplates().catch(() => loadTemplates()).catch((error) => {
+      showBootError('화면 구성 파일을 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침해 주세요.');
+      throw error;
+    }),
   ]);
+  ensureToastRegion();
   markActiveNav();
   renderHeaderUser(null);
 
   if (!withAuth) return;
-  try {
-    const authModule = await import('./auth.js');
-    authModule.onUserChanged(renderHeaderUser);
-    bindLogout(authModule);
-  } catch (error) {
-    // Firebase SDK를 못 불러와도(오프라인 등) 나머지 화면은 동작하게
-    console.error('[layout] 로그인 모듈을 불러오지 못했어요', error);
-  }
+  // 로그인 모듈은 기다리지 않고 따로 불러옴 → Firebase(gstatic.com)가 느리거나 막혀도
+  // 페이지 기능(검색·추천 등)은 바로 동작하고, 헤더의 로그인 표시는 불러오는 대로 바뀜
+  import('./auth.js')
+    .then((authModule) => {
+      // 다른 탭에서 로그아웃하면: 헤더를 바꾸고, 로그인이 필요한 페이지면 홈으로 이동
+      // (그대로 두면 남의 눈에 내 목록이 보이고, 모든 저장이 권한 오류로 실패함)
+      let wasLoggedIn = false;
+      authModule.onUserChanged((user) => {
+        renderHeaderUser(user);
+        if (wasLoggedIn && !user && isProtectedPage()) window.location.replace('index.html');
+        wasLoggedIn = Boolean(user);
+      });
+      bindLogout(authModule);
+    })
+    .catch((error) => {
+      // Firebase SDK를 못 불러와도(오프라인 등) 나머지 화면은 동작하게
+      console.error('[layout] 로그인 모듈을 불러오지 못했어요', error);
+    });
 }

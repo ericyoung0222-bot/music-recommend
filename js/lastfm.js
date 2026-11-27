@@ -60,11 +60,22 @@ function readCache(key) {
 }
 
 // sessionStorage에 캐시 저장 (용량 초과 등은 무시)
+// 저장 공간(탭마다 약 5MB)이 차면 Last.fm 캐시만 비우고 한 번 더 시도
+// (그대로 두면 고른 곡 목록 같은 더 중요한 값도 저장되지 않음)
 function writeCache(key, value) {
+  let json;
   try {
-    window.sessionStorage.setItem(key, JSON.stringify(value));
+    json = JSON.stringify(value);
+    window.sessionStorage.setItem(key, json);
   } catch {
-    /* 캐시는 없어도 동작에 문제 없음 */
+    try {
+      Object.keys(window.sessionStorage)
+        .filter((k) => k.startsWith(CACHE_PREFIX))
+        .forEach((k) => window.sessionStorage.removeItem(k));
+      if (json) window.sessionStorage.setItem(key, json);
+    } catch {
+      /* 캐시는 없어도 동작에 문제 없음 */
+    }
   }
 }
 

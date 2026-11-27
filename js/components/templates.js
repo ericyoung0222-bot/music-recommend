@@ -20,7 +20,10 @@ export function loadTemplates() {
       doc.querySelectorAll('template[data-template]').forEach((tpl) => {
         templates.set(tpl.dataset.template, tpl);
       });
-    })();
+    })().catch((error) => {
+      loadingPromise = null; // 실패를 기억하지 않음 → 다음에 다시 시도할 수 있게
+      throw error;
+    });
   }
   return loadingPromise;
 }

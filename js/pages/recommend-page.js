@@ -17,16 +17,14 @@ import { showToast } from '../components/toast.js';
 import { renderSuggestion, bindSuggestionList } from '../components/suggestion.js?v=20261123c';
 import { renderChip } from '../components/chip.js';
 import { renderTrackCard, getRatingSlot } from '../components/track-card.js';
-import { openAddToPlaylistModal } from '../playlist-modal.js';
-import { isAuthAvailable, getCurrentUser } from '../auth.js';
-import { getLowRatedKeys, getMyRatingsMap } from '../rating.js';
-import { mountTrackRating } from '../rating-ui.js';
 
 const MIN_SEEDS = 3;
 const MAX_SEEDS = 5;
 const SEARCH_LIMIT = 8;
 const MIN_QUERY_LENGTH = 1;
 const SEEDS_STORAGE_KEY = 'recommend:seeds';
+// 추천 결과를 보여 준 상태인지 (로그인하고 돌아오거나 새로고침하면 결과를 다시 보여 주기 위해)
+const RESULTS_FLAG_KEY = 'recommend:showResults';
 
 // 페이지 상태
 const state = {
@@ -36,6 +34,7 @@ const state = {
   searchToken: 0,     // 늦게 도착한 옛 검색 결과를 무시하기 위한 번호
   ignoreQuery: '',    // 곡을 고르며 지운 검색어 (한글 입력기가 글자를 되살려도 다시 검색하지 않기 위해)
   ignoreUntil: 0,
+  recommending: false, // 추천 실행 중인지
   defaultPlaceholder: '',
 };
 
@@ -68,6 +67,24 @@ function saveSeeds() {
   }
 }
 
+// 결과 표시 상태 기록/지우기 (곡 목록이 바뀌면 지움 → 다른 곡의 옛 결과를 자동으로 띄우지 않게)
+function setResultsFlag(on) {
+  try {
+    if (on) window.sessionStorage.setItem(RESULTS_FLAG_KEY, '1');
+    else window.sessionStorage.removeItem(RESULTS_FLAG_KEY);
+  } catch {
+    /* 저장 못 해도 동작에는 문제 없음 */
+  }
+}
+
+function readResultsFlag() {
+  try {
+    return window.sessionStorage.getItem(RESULTS_FLAG_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
 // 칩 목록, 개수 안내, 버튼 상태 다시 그리기
 function renderSeeds() {
   const chips = state.seeds.map((seed) => renderChip({
@@ -82,7 +99,8 @@ function renderSeeds() {
     ? `${count} / ${MAX_SEEDS}곡 선택 완료`
     : `${count} / ${MAX_SEEDS}곡 선택 (최소 ${MIN_SEEDS}곡)`;
 
-  setDisabled(el.submit, count < MIN_SEEDS || !isLastfmConfigured());
+  // 추천 중에는 곡을 바꿔도 버튼이 다시 켜지지 않게 (두 번 실행되어 결과가 뒤섞이는 것 방지)
+  setDisabled(el.submit, count < MIN_SEEDS || !isLastfmConfigured() || state.recommending);
 
   const full = count >= MAX_SEEDS;
   setDisabled(el.searchInput, full || !isLastfmConfigured());
@@ -103,6 +121,7 @@ function addSeed(track) {
   }
   const { key, title, artist, image, url } = track;
   state.seeds.push({ key, title, artist, image, url });
+  setResultsFlag(false);
   renderSeeds();
   return true;
 }
@@ -110,6 +129,7 @@ function addSeed(track) {
 // 곡 빼기
 function removeSeed(key) {
   state.seeds = state.seeds.filter((seed) => seed.key !== key);
+  setResultsFlag(false);
   renderSeeds();
   el.searchInput.focus();
 }
@@ -281,11 +301,24 @@ function handleSearchKeydown(event) {
 // 추천 결과
 // ---------------------------------------------------------------------
 
+// 로그인·평점·플레이리스트 기능 불러오기 (한 번만, 실패하면 null → 그 기능만 빠지고 추천은 계속)
+let accountPromise = null;
+function loadAccount() {
+  if (!accountPromise) {
+    accountPromise = import('../recommend-account.js').catch((error) => {
+      console.warn('[recommend] 로그인 기능을 불러오지 못했어요 (검색·추천은 계속 동작)', error);
+      accountPromise = null; // 다음에 다시 시도
+      return null;
+    });
+  }
+  return accountPromise;
+}
+
 // 결과에서 뺄 곡 키: 로그인했다면 내가 2점 이하로 준 곡 (실패해도 추천은 계속)
-async function getExcludeKeys(user) {
-  if (!user) return new Set();
+async function getExcludeKeys(user, account) {
+  if (!user || !account) return new Set();
   try {
-    return await getLowRatedKeys(user.uid);
+    return await account.getLowRatedKeys(user.uid);
   } catch (error) {
     console.warn('[recommend] 저평가 곡 목록을 못 불러와서 제외 없이 추천해요', error);
     return new Set();
@@ -293,20 +326,20 @@ async function getExcludeKeys(user) {
 }
 
 // 지금 로그인한 사용자 (Firebase 설정이 없으면 null)
-async function getUserIfAny() {
-  if (!isAuthAvailable()) return null;
+async function getUserIfAny(account) {
+  if (!account?.isAuthAvailable()) return null;
   try {
-    return await getCurrentUser();
+    return await account.getCurrentUser();
   } catch {
     return null;
   }
 }
 
 // 내 평점 표 (없거나 실패하면 빈 표)
-async function getMyRatings(user) {
-  if (!user) return new Map();
+async function getMyRatings(user, account) {
+  if (!user || !account) return new Map();
   try {
-    return await getMyRatingsMap(user.uid);
+    return await account.getMyRatingsMap(user.uid);
   } catch (error) {
     console.warn('[recommend] 내 평점을 못 불러왔어요', error);
     return new Map();
@@ -315,17 +348,22 @@ async function getMyRatings(user) {
 
 // 추천 카드의 "플레이리스트에 추가" → 플레이리스트 선택 모달
 function handleAddToPlaylist(track) {
-  openAddToPlaylistModal(track).catch((error) => {
-    console.error('[recommend] 플레이리스트 모달 오류', error);
-    showToast('플레이리스트를 열지 못했어요. 잠시 후 다시 시도해 주세요.', { type: 'error' });
-  });
+  loadAccount()
+    .then((account) => {
+      if (!account) throw new Error('로그인 기능을 불러오지 못했어요');
+      return account.openAddToPlaylistModal(track);
+    })
+    .catch((error) => {
+      console.error('[recommend] 플레이리스트 모달 오류', error);
+      showToast('플레이리스트를 열지 못했어요. 인터넷 연결을 확인하고 잠시 후 다시 시도해 주세요.', { type: 'error' });
+    });
 }
 
-// 결과 카드 그리기 (카드마다 별점 붙이기)
-function renderResults(tracks, { user, myRatings }) {
+// 결과 카드 그리기 (카드마다 별점 붙이기, 로그인 기능을 못 불러왔으면 별점 없이)
+function renderResults(tracks, { user, myRatings, account }) {
   const cards = tracks.map((track) => {
     const card = renderTrackCard(track, { onAdd: handleAddToPlaylist });
-    mountTrackRating(getRatingSlot(card), track, {
+    account?.mountTrackRating(getRatingSlot(card), track, {
       user,
       myScore: myRatings.get(track.key)?.score ?? null,
     });
@@ -336,7 +374,10 @@ function renderResults(tracks, { user, myRatings }) {
 
 // 추천 실행
 async function runRecommend() {
-  if (state.seeds.length < MIN_SEEDS) return;
+  if (state.recommending || state.seeds.length < MIN_SEEDS) return;
+  state.recommending = true;
+  // 시작할 때의 곡 목록으로 고정 (도중에 곡을 더하거나 빼도 이번 추천에는 영향 없음)
+  const seeds = state.seeds.slice();
 
   el.resultsSection.hidden = false;
   setState(el.resultsSection, 'is-loading', true);
@@ -349,11 +390,12 @@ async function runRecommend() {
   el.resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   try {
-    const user = await getUserIfAny();
-    const excludeKeys = await getExcludeKeys(user);
+    const account = await loadAccount();
+    const user = await getUserIfAny(account);
+    const excludeKeys = await getExcludeKeys(user, account);
     const {
       tracks, usedFallback, augmentedSeeds, failedSeeds,
-    } = await getRecommendations(state.seeds, { excludeKeys });
+    } = await getRecommendations(seeds, { excludeKeys });
 
     if (!tracks.length) {
       setState(el.resultsSection, 'is-empty', true);
@@ -372,7 +414,9 @@ async function runRecommend() {
     if (failedSeeds) notes.push(`고른 곡 중 ${failedSeeds}곡은 정보를 가져오지 못했어요.`);
     if (excludeKeys.size) notes.push('내가 2점 이하로 평가한 곡은 뺐어요.');
     setText(el.resultsSection, 'results-summary', notes.join(' '));
-    renderResults(tracks, { user, myRatings: await getMyRatings(user) });
+    renderResults(tracks, { user, account, myRatings: await getMyRatings(user, account) });
+    // 같은 곡 목록이면 새로고침·로그인 후에도 결과를 다시 보여 줌 (시작할 때의 곡 목록 그대로일 때만)
+    setResultsFlag(seeds.length === state.seeds.length && seeds.every((s, i) => s.key === state.seeds[i].key));
   } catch (error) {
     console.error('[recommend] 추천 실패', error);
     setState(el.resultsSection, 'is-error', true);
@@ -383,8 +427,9 @@ async function runRecommend() {
     });
   } finally {
     setState(el.resultsSection, 'is-loading', false);
+    state.recommending = false;
     setBusy(el.submit, false);
-    setDisabled(el.submit, state.seeds.length < MIN_SEEDS);
+    setDisabled(el.submit, state.seeds.length < MIN_SEEDS || !isLastfmConfigured());
   }
 }
 
@@ -405,6 +450,8 @@ function cacheElements() {
   el.reset = $('seed-reset');
   el.configStatus = $('config-status');
   el.resultsSection = $('results-section');
+  // 결과 요약 문장을 스크린리더가 읽어 주도록 (HTML을 고쳐도 빠지지 않게 JS에서 지정)
+  $('results-summary', el.resultsSection)?.setAttribute('role', 'status');
   el.resultsStatus = $('results-status');
   el.resultsList = $('results-list');
 }
@@ -440,6 +487,7 @@ function bindEvents() {
 
   el.reset.addEventListener('click', () => {
     state.seeds = [];
+    setResultsFlag(false);
     renderSeeds();
     el.searchInput.focus();
   });
@@ -461,6 +509,12 @@ async function main() {
   state.seeds = loadSeeds();
   renderSeeds();
   bindEvents();
+
+  // 로그인하고 돌아왔거나 새로고침한 경우: 보던 추천 결과를 다시 보여 줌
+  // (Last.fm 응답은 이 탭에 저장해 둔 것을 다시 쓰므로 추가 요청은 거의 없음)
+  if (readResultsFlag() && state.seeds.length >= MIN_SEEDS && isLastfmConfigured()) runRecommend();
+  // 로그인·평점 기능은 미리 불러 두기 (실패해도 검색·추천은 그대로)
+  loadAccount();
 }
 
 main().catch((error) => console.error('[recommend] 초기화 실패', error));
