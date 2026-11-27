@@ -11,7 +11,7 @@
 //  5. 처음에 숨겨 둬야 하는 요소의 hidden, 버튼 type, 별 data-score 1~5, 정렬 option 값
 //  6. id 참조(for, aria-controls, aria-labelledby, href="#...")가 같은 페이지에 있는지
 //  7. 기능용 CSS: [hidden]{display:none !important}, .visually-hidden, 건너뛰기 링크 :focus,
-//     토스트 영역 pointer-events
+//     토스트 영역·"추가됨" 표시 영역 pointer-events
 //  8. HTML/CSS가 가리키는 로컬 파일(css, js, 이미지, 페이지)이 실제로 있는지
 //
 // 다른 폴더에서 검사하려면: node tests/contract.test.mjs <프로젝트 폴더>
@@ -522,6 +522,17 @@ test('토스트 영역이 클릭을 막지 않고, 토스트 자체는 눌림', 
   if (regionNone) {
     const toastAuto = classesOf(toastRoot).some((c) => declOf(cssRules, `.${c}`, 'pointer-events') === 'auto');
     assert.ok(toastAuto, '토스트 영역이 pointer-events: none인데 토스트에 pointer-events: auto가 없어요 → 닫기·로그인 링크가 안 눌려요');
+  }
+});
+
+test('"추가됨" 표시 영역이 화면을 덮어도 클릭을 막지 않음', () => {
+  const region = openTags(html[partialFiles.footer]).find((t) => t.attrs['data-js'] === 'hud-region');
+  assert.ok(region, 'footer에 data-js="hud-region"이 없어요 ("플레이리스트에 추가됨" 표시 자리)');
+  assert.ok(classesOf(region).includes('hud-region'), 'hud-region 요소의 class="hud-region"을 지우거나 바꾸지 마세요 (JS도 이 이름으로 만들어요)');
+  const covers = ['fixed', 'absolute'].includes(declOf(cssRules, '.hud-region', 'position'));
+  if (covers) {
+    assert.equal(declOf(cssRules, '.hud-region', 'pointer-events'), 'none',
+      '.hud-region이 화면 위에 떠 있는데 pointer-events: none이 없어요 → 표시가 뜬 동안 화면 전체가 안 눌려요');
   }
 });
 

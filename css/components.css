@@ -854,8 +854,7 @@
   max-width: 280px;
   padding: var(--space-5) var(--space-6);
   border-radius: var(--radius-lg);
-  background: rgba(29, 31, 39, 0.86); /* color-mix를 모르는 옛 브라우저(iOS 16.1 이하 등)용 */
-  background: color-mix(in srgb, var(--color-text) 82%, transparent);
+  background: var(--color-hud-bg);
   color: var(--color-surface);
   text-align: center;
   box-shadow: var(--shadow-lg);

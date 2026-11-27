@@ -27,6 +27,7 @@
   --color-success-strong: #157a41;  /* 성공 글자 (밝은 배경 위에서도 잘 읽히게: 대비 4.5:1 이상) */
   --color-focus: #ff8a00;           /* 키보드 포커스 테두리 */
   --color-overlay: rgba(20, 22, 30, 0.5); /* 모달 뒤 어두운 배경 */
+  --color-hud-bg: rgba(29, 31, 39, 0.86); /* "플레이리스트에 추가됨" 확인 상자 배경 (반투명, 글자는 --color-surface) */
 
   /* ---------- 폰트 ---------- */
   --font-family-base: system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;

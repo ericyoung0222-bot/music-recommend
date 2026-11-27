@@ -105,6 +105,8 @@
 .sg-swatch--danger-soft .sg-swatch__chip { background: var(--color-danger-soft); }
 .sg-swatch--success .sg-swatch__chip { background: var(--color-success); }
 .sg-swatch--success-soft .sg-swatch__chip { background: var(--color-success-soft); }
+.sg-swatch--success-strong .sg-swatch__chip { background: var(--color-success-strong); }
+.sg-swatch--hud-bg .sg-swatch__chip { background: var(--color-hud-bg); }
 .sg-swatch--focus .sg-swatch__chip { background: var(--color-focus); }
 .sg-swatch--overlay .sg-swatch__chip { background: var(--color-overlay); }
 

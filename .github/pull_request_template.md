@@ -54,7 +54,7 @@ Closes #
 <!--
   확인한 곳의 [ ] 를 [x] 로 바꿔 주세요. (PR을 만든 뒤에는 체크박스를 직접 클릭해도 돼요)
   styleguide.html 섹션 이름: #sg-colors #sg-type #sg-tokens #sg-header #sg-buttons #sg-forms #sg-search
-                              #sg-cards #sg-stars #sg-status #sg-toast #sg-modal #sg-playlists #sg-notice
+                              #sg-cards #sg-stars #sg-status #sg-toast #sg-modal #sg-playlists #sg-hud #sg-notice
 -->
 
 - [ ] styleguide.html (확인한 섹션: `#sg-` )

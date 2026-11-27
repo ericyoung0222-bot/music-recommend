@@ -51,9 +51,11 @@
 | `--color-star` | 채워진 별 |
 | `--color-star-empty` | 빈 별 |
 | `--color-danger` / `--color-danger-hover` / `--color-danger-soft` | 삭제 버튼, 에러 |
-| `--color-success` / `--color-success-soft` | 성공 토스트 |
+| `--color-success` / `--color-success-soft` | 성공 토스트, "✓ 추가됨" 버튼 배경 |
+| `--color-success-strong` | "✓ 추가됨"·"✓ 담김" 글자 (밝은 배경 위에서 대비 4.5:1 이상 유지) |
 | `--color-focus` | 키보드 포커스 테두리 |
 | `--color-overlay` | 모달 뒤 어두운 배경 |
+| `--color-hud-bg` | "플레이리스트에 추가됨" 확인 상자 배경 (글자는 `--color-surface`) |
 
 ### 글꼴
 
@@ -65,7 +67,8 @@
 | `--font-weight-regular`, `--font-weight-bold` | 400, 700 |
 | `--line-height-tight`, `--line-height-base` | 제목 1.3, 본문 1.6 |
 
-> 웹폰트(예: Pretendard)를 쓰고 싶으면 `css/base.css` 맨 위에 `@import`나 `@font-face`를 넣고 `--font-family-base`만 바꾸면 됩니다. 외부 글꼴 주소를 쓸 때는 개발 담당에게 알려 주세요. (보안 설정에 주소를 추가해야 할 수 있음)
+> 웹폰트(예: Pretendard)를 쓰고 싶으면 글꼴 파일(`.woff2`)을 `assets/fonts/`에 넣고, `css/base.css` 맨 위에 `@font-face`로 연결한 뒤 `--font-family-base`만 바꾸면 됩니다.
+> ⚠️ **외부 주소(CDN)의 글꼴·CSS는 보안 설정(CSP)이 항상 막습니다.** `@import url("https://...")`를 넣으면 글꼴이 안 바뀌고 콘솔에 빨간 에러가 뜨며, PR 자동 검사도 실패합니다. 꼭 외부 주소를 써야 하면 개발 담당에게 먼저 말해 주세요.
 
 ### 간격 · 모서리 · 그림자 · 기타
 
@@ -133,7 +136,10 @@ JS로 그려지는 컴포넌트는 모두 `partials/templates.html`에 원본이
 
 ### 4-2. 푸터 (`partials/footer.html`)
 
-`.site-footer`, `.site-footer__inner`, `.site-footer__text`. 아래의 `<div class="toast-region" data-js="toast-region">`은 토스트가 뜨는 자리라 지우면 안 됩니다.
+`.site-footer`, `.site-footer__inner`, `.site-footer__text`. 아래의 두 자리는 지우면 안 됩니다.
+
+- `<div class="toast-region" data-js="toast-region">` — 토스트가 뜨는 자리
+- `<div class="hud-region" data-js="hud-region">` — "플레이리스트에 추가됨" 확인 표시가 뜨는 자리 ([4-13](#4-13-플레이리스트에-추가됨-표시)). `class="hud-region"`도 그대로 두세요.
 
 ### 4-3. 버튼
 
@@ -275,7 +281,17 @@ JS로 그려지는 컴포넌트는 모두 `partials/templates.html`에 원본이
 </dialog>
 ```
 
-삭제 확인 모달 내용: `.confirm`, `.confirm__message`, `.modal__actions` (취소/확인 버튼)
+삭제 확인 모달 내용:
+
+```html
+<div class="confirm">
+  <p class="confirm__message" data-js="confirm-message"></p>
+  <div class="modal__actions">
+    <button class="btn btn--secondary" data-js="confirm-cancel">취소</button>
+    <button class="btn btn--danger" data-js="confirm-ok">확인</button>
+  </div>
+</div>
+```
 
 ### 4-11. 플레이리스트
 
@@ -306,13 +322,39 @@ JS로 그려지는 컴포넌트는 모두 `partials/templates.html`에 원본이
       </button>
     </li>
   </ul>
-  <form class="picker__form form-row" data-js="picker-create-form">…</form>
+  <form class="picker__form form-row" data-js="picker-create-form">
+    <label class="field">
+      <span class="field__label">새 플레이리스트 만들기</span>
+      <input class="input" data-js="picker-create-input">
+    </label>
+    <button class="btn btn--primary" data-js="picker-create-submit">만들고 추가</button>
+  </form>
 </div>
 ```
+
+이미 이 곡이 담긴 플레이리스트 줄에는 `is-added`가 붙고, 개수 자리에 "✓ 담김 · N곡"이 들어갑니다.
 
 ### 4-12. 안내 상자 (login.html, 카카오톡 등 앱 안 브라우저일 때)
 
 `.notice`, `.notice__title`, `.notice__text`, `.notice__actions`
+
+### 4-13. "플레이리스트에 추가됨" 표시
+
+곡을 플레이리스트에 담으면 화면 가운데에 약 1.6초 떴다 사라지는 확인 상자입니다. styleguide.html `#sg-hud`에서 "확인 표시 띄우기"로 볼 수 있습니다.
+
+```html
+<div class="hud-region" data-js="hud-region">                 ← footer.html. 화면 전체를 덮는 투명한 자리
+  <div class="added-hud" data-js="added-hud">                  ← 사라질 때 is-leaving (0.25초 뒤 지워짐)
+    <span class="added-hud__icon">✓</span>
+    <p class="added-hud__title" data-js="added-hud-title">플레이리스트에 추가됨</p>
+    <p class="added-hud__name" data-js="added-hud-name"></p>   ← "플레이리스트 이름"
+  </div>
+</div>
+```
+
+- ⚠️ `.hud-region`의 `pointer-events: none`은 **지우지 마세요.** 지우면 표시가 뜬 동안 화면 전체가 안 눌립니다. (PR 자동 검사가 확인합니다)
+- 등장·퇴장 애니메이션은 `@keyframes hud-in` / `hud-out`이고, 모양·위치·애니메이션은 자유롭게 바꿔도 됩니다. 단, 퇴장 애니메이션은 0.25초 안에 끝나야 자연스럽습니다.
+- 함께 쓰는 상태: 곡 카드 버튼 `.btn.is-added`("✓ 추가됨"), 선택 창 줄 `.picker__button.is-added`("✓ 담김")
 
 ---
 
@@ -326,9 +368,10 @@ JS로 그려지는 컴포넌트는 모두 `partials/templates.html`에 원본이
 | playlists.html | `pages/playlists.css` | `.create-form` |
 | playlist.html | `pages/playlist.css` | `.back-link`, `.playlist-header`, `.playlist-header__actions`, `.rename-form` |
 | ratings.html | `pages/ratings.css` | `.toolbar`, `.toolbar__field`, `.toolbar__count` |
-| 공통 | `components.css` | `.page`, `.page-header`, `.page-header__title`, `.page-header__desc`, `.section`, `.section__title`, `.container`, `.visually-hidden`, `.skip-link` |
+| 공통 | `components.css` | `.page`, `.page-header`, `.page-header__title`, `.page-header__desc`, `.section`, `.section__title` |
+| 공통 | `base.css` | `.container`, `.visually-hidden`, `.skip-link`("본문으로 건너뛰기"), `.boot-notice`(헤더가 늦게 뜨거나 파일을 못 불러올 때 안내 — JS도 이 class 이름으로 만들어서 이름은 그대로) |
 
-> 로그인이 필요한 페이지(playlists, playlist, ratings)는 로그인하지 않으면 본문이 보이지 않습니다. 이 페이지들의 부품은 styleguide.html에서 확인하세요.
+> 로그인이 필요한 페이지(playlists, playlist, ratings)는 로그인해야 본문이 보입니다. 로컬 서버를 **`http://localhost:5173`** 으로 열고 본인 구글 계정으로 로그인하면 실제 화면을 볼 수 있어요. (다른 포트나 Live Server 주소에서는 로그인이 안 됩니다) 로그인 없이 부품만 볼 때는 styleguide.html을 쓰세요.
 
 ---
 

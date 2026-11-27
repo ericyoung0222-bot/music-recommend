@@ -101,7 +101,7 @@
 | `js/` 폴더 전체 | 사이트 기능(추천, 로그인, 플레이리스트, 별점)이 들어 있습니다. 열 필요도 없습니다. |
 | `js/config.js` | API 키와 Firebase 설정이 들어 있습니다. 특히 절대 고치지 마세요. |
 | HTML의 `data-` 로 시작하는 속성 전부 (`data-js`, `data-page`, `data-template`, `data-score` 등) | 기능이 요소를 찾는 **이름표**입니다. 지우거나 바꾸면 버튼이 안 눌리거나 화면이 안 나옵니다. |
-| 상태 클래스 **이름** (`is-loading`, `is-empty`, `is-error`, `is-active`, `is-selected`, `is-disabled`, `is-logged-in`, `is-success`) | JS가 붙였다 뗐다 합니다. **이름은 그대로, 모양(CSS)만** 정하세요. |
+| 상태 클래스 **이름** (`is-loading`, `is-empty`, `is-error`, `is-active`, `is-selected`, `is-disabled`, `is-logged-in`, `is-success`, `is-added`, `is-leaving`) | JS가 붙였다 뗐다 합니다. **이름은 그대로, 모양(CSS)만** 정하세요. |
 | `firestore.rules` | 데이터베이스 보안 규칙 |
 | `serve.json` | 로컬 서버 설정 |
 | `.nojekyll` | GitHub Pages 배포에 필요한 빈 파일 (지우면 사이트가 깨질 수 있음) |
@@ -204,7 +204,9 @@ PR을 만든 뒤 다른 파일도 같은 작업에 포함하고 싶으면, **같
 
 파일을 더블클릭해서 열면 사이트가 동작하지 않습니다. 아래 두 방법 중 **하나**로 여세요.
 
-**방법 ① VS Code Live Server 확장 (쉬움)**
+> **어느 방법을 쓸까?** 로그인이 필요한 화면(플레이리스트, 내 평점)까지 실제로 보려면 **방법 ②(주소 `localhost:5173`)** 를 쓰세요. 로그인은 보안 설정상 `http://localhost:5173` 에서만 됩니다. 방법 ①은 styleguide와 로그인 없이 보이는 페이지(메인, 추천받기)만 확인할 때 편합니다.
+
+**방법 ① VS Code Live Server 확장 (쉬움, 로그인 안 됨)**
 
 1. VS Code 왼쪽 **확장(Extensions)** 아이콘(네모 4개)을 누릅니다.
 2. `Live Server` 를 검색해 **(Install)** 합니다.
@@ -212,7 +214,7 @@ PR을 만든 뒤 다른 파일도 같은 작업에 포함하고 싶으면, **같
 4. 브라우저에 `http://127.0.0.1:5500/styleguide.html` 같은 주소가 열립니다.
 5. CSS를 저장할 때마다 화면이 자동으로 새로고침됩니다.
 
-**방법 ② Node.js로 서버 켜기**
+**방법 ② Node.js로 서버 켜기 (로그인까지 확인 가능)**
 
 1. <https://nodejs.org> 에서 **LTS** 버전을 설치합니다.
 2. VS Code 메뉴 **Terminal → New Terminal** 을 엽니다.
@@ -252,6 +254,7 @@ PR을 만든 뒤 다른 파일도 같은 작업에 포함하고 싶으면, **같
 | `#sg-toast` | 토스트 알림 | `css/components.css`, `partials/templates.html` |
 | `#sg-modal` | 모달 | `css/components.css`, `partials/templates.html` |
 | `#sg-playlists` | 플레이리스트 | `css/components.css`, `css/pages/playlists.css`, `partials/templates.html` |
+| `#sg-hud` | "플레이리스트에 추가됨" 확인 표시 ("확인 표시 띄우기" 버튼) | `css/components.css`, `partials/templates.html`, `partials/footer.html` |
 | `#sg-notice` | 안내 상자 (login.html에서 쓰임) | `css/components.css` |
 
 styleguide 확인이 끝나면 실제 페이지(`index.html`, `recommend.html`, `login.html`)도 한 번씩 열어 보세요.
@@ -441,14 +444,16 @@ style: 로고 이미지 교체
 
 ### main에 바로 커밋했어요
 
-**방법 A에서:** 커밋 창에서 **(Commit directly to the `main` branch)** 를 골랐다면 이미 main에 들어갔습니다. 혼자 되돌리려 하지 말고 **바로 신원영에게 알려 주세요.** (사이트에 바로 반영되므로 빨리 말할수록 좋습니다)
+> `main`은 **보호 브랜치**로 설정되어 있어서, 팀원 계정으로는 main에 직접 올릴 수 없습니다. PR + 자동 검사 통과 + 신원영 승인을 거쳐야만 합쳐집니다. 그래서 실수해도 사이트가 바로 바뀌지는 않으니 안심하세요.
 
-**방법 B에서 아직 Push 전이라면:**
+**방법 A에서:** 커밋 창에 **(Commit directly to the `main` branch)** 가 아예 없거나 눌리지 않으면 정상입니다. **(Create a new branch ...)** 쪽을 고르세요.
+
+**방법 B에서 Push할 때 `protected branch` 같은 오류가 났다면:** main에 커밋한 것입니다. 아래 "아직 Push 전이라면" 순서대로 커밋을 취소하고 새 브랜치로 옮기세요.
+
+**방법 B에서 아직 Push 전이라면 (또는 위 오류가 났다면):**
 1. GitHub Desktop 왼쪽 **(History)** 탭에서 방금 커밋을 오른쪽 클릭 → **(Undo commit)** 을 누릅니다. 고친 내용은 그대로 남습니다.
 2. [5-3](#5-3-작업-브랜치-만들기-작업마다)처럼 새 브랜치를 만듭니다. 고친 내용을 어디에 둘지 묻는 창이 뜨면 **새 브랜치로 가져가기(Bring my changes to ...)** 를 고릅니다.
 3. 다시 커밋합니다.
-
-**방법 B에서 이미 Push 했다면:** 신원영에게 알려 주세요.
 
 > 예방법: 커밋 버튼 글자 끝이 **main** 이면 누르지 마세요. **(Commit ... to design/...)** 처럼 내 브랜치 이름이어야 합니다.
 
@@ -478,7 +483,8 @@ style: 로고 이미지 교체
 | 파일을 더블클릭해서 열었더니 "불러오는 중…"에서 멈춤 | 로컬 서버로 여세요. ([5-5](#5-5-고친-화면-미리-보기)) |
 | `npx serve . -l 5173` 을 쳤더니 "스크립트를 실행할 수 없으므로" 오류 | `npx.cmd serve . -l 5173` 로 입력하거나 Live Server(방법 ①)를 쓰세요. |
 | CSS를 고쳤는데 화면이 그대로 | `Ctrl + S` 로 저장했는지, 브라우저에서 `Ctrl + Shift + R` (강력 새로고침) 해 보세요. |
-| 로그인이 필요한 페이지(플레이리스트, 내 평점)가 안 보임 | 정상입니다. 그 부품들은 `styleguide.html` 의 `#sg-playlists`, `#sg-cards`, `#sg-stars` 에서 확인하세요. |
+| 로그인이 필요한 페이지(플레이리스트, 내 평점)가 안 보임 | 로그인해야 보입니다. `http://localhost:5173` 으로 열었는지 확인하고([5-5](#5-5-고친-화면-미리-보기) 방법 ②) 본인 구글 계정으로 로그인하세요. 로그인 없이 부품만 볼 때는 `styleguide.html` 의 `#sg-playlists`, `#sg-cards`, `#sg-stars` 를 쓰세요. |
+| 로컬에서 로그인 버튼을 눌렀더니 오류가 뜨거나 로그인이 안 됨 | 주소가 `localhost:5173` 인지 확인하세요. Live Server(`127.0.0.1:5500`)나 다른 포트에서는 로그인이 막힙니다. 방법 ②로 다시 여세요. |
 | GitHub Desktop에 `js/` 파일이 바뀌었다고 나옴 | 그 파일 체크를 해제하고 오른쪽 클릭 → **(Discard changes...)** 로 되돌린 뒤 신원영에게 알려 주세요. |
 | 연필 아이콘이 회색이거나 "Fork" 이야기가 나옴 | 레포 초대를 아직 수락하지 않았습니다. ([2-2](#2-2-레포-초대collaborator-수락)) |
 
