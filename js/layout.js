@@ -7,6 +7,7 @@ import { $, $$, setText, safeUrl, setBusy } from './utils/dom.js';
 import { buildLoginUrl, getCurrentPage, isProtectedPage } from './utils/page.js';
 import { loadTemplates } from './components/templates.js';
 import { showToast } from './components/toast.js';
+import { ensureHudRegion } from './components/added-hud.js';
 
 const DEFAULT_AVATAR = 'assets/default-avatar.svg';
 
@@ -126,6 +127,7 @@ export async function initLayout({ withAuth = true } = {}) {
     }),
   ]);
   ensureToastRegion();
+  ensureHudRegion(); // "추가됨" 확인 표시 자리 (스크린리더가 읽도록 미리 만들어 둠)
   markActiveNav();
   renderHeaderUser(null);
 

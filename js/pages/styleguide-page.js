@@ -7,7 +7,8 @@ import { initLayout, renderHeaderUser } from '../layout.js';
 import { $, setText, setState } from '../utils/dom.js';
 import { makeTrackKey } from '../utils/track-key.js';
 import { cloneTemplate } from '../components/templates.js';
-import { renderTrackCard, getRatingSlot } from '../components/track-card.js';
+import { renderTrackCard, getRatingSlot, setCardAdded } from '../components/track-card.js?v=20261127a';
+import { showAddedHud } from '../components/added-hud.js';
 import { renderSuggestion } from '../components/suggestion.js';
 import { renderChip } from '../components/chip.js';
 import { createStarRating } from '../components/star-rating.js';
@@ -34,7 +35,8 @@ const TRACKS = [
 
 const now = Date.now();
 const PLAYLISTS = [
-  { id: 'demo1', name: '비 오는 날 듣는 곡', tracks: new Array(12).fill(null), updatedAt: new Date(now) },
+  // 첫 플레이리스트에는 예시 곡(밤편지)이 이미 들어 있음 → 선택 화면에서 "✓ 담김"으로 보임
+  { id: 'demo1', name: '비 오는 날 듣는 곡', tracks: [{ key: TRACKS[0].key }, ...new Array(11).fill(null)], updatedAt: new Date(now) },
   { id: 'demo2', name: '운동할 때', tracks: new Array(3).fill(null), updatedAt: new Date(now - 86400000 * 3) },
   { id: 'demo3', name: '아직 비어 있는 플레이리스트', tracks: [], updatedAt: new Date(now - 86400000 * 30) },
 ];
@@ -89,12 +91,18 @@ function demoStars(track, { myScore = null, average = null, count = 0, loggedIn 
 
 // 곡 카드
 function renderCardsDemo() {
+  // "플레이리스트에 추가"를 누르면: 가운데 확인 표시 + 버튼이 "✓ 추가됨"으로 (실제 동작과 같은 모양)
+  const demoAdd = (track, _button, card) => {
+    showAddedHud({ name: '비 오는 날 듣는 곡' });
+    setCardAdded(card, track, true);
+  };
   const cards = [
-    renderTrackCard(TRACKS[0], { onAdd: () => showToast('(예시) 플레이리스트에 추가') }),
-    renderTrackCard(TRACKS[1], { onAdd: () => showToast('(예시) 플레이리스트에 추가') }),
+    renderTrackCard(TRACKS[0], { onAdd: demoAdd }),
+    renderTrackCard(TRACKS[1], { onAdd: demoAdd }),
     renderTrackCard(TRACKS[2], { meta: '2026. 11. 23. 추가', onRemove: () => showToast('(예시) 목록에서 빼기') }),
-    renderTrackCard(TRACKS[3], { onAdd: () => showToast('(예시) 플레이리스트에 추가') }),
+    renderTrackCard(TRACKS[3], { onAdd: demoAdd }),
   ];
+  setCardAdded(cards[1], TRACKS[1], true); // 이미 담은 곡 예시
   const ratings = [
     { myScore: null, average: 4.2, count: 12 },
     { myScore: null, average: null, count: 0 },
@@ -185,23 +193,24 @@ function renderToastDemo() {
 }
 
 // 가짜 플레이리스트 선택 화면 만들기
+// onDone(플레이리스트 이름): 고르거나 만들었을 때
 function fakePicker(onDone) {
   const picker = renderPlaylistPicker({
     trackLabel: `${TRACKS[0].title} — ${TRACKS[0].artist}`,
-    onSelect: (playlist) => onDone(`(예시) "${playlist.name}"에 담았어요`),
-    onCreate: (name) => onDone(`(예시) "${name || '이름 없음'}" 만들고 담았어요`),
+    onSelect: (playlist) => onDone(playlist.name),
+    onCreate: (name) => onDone(name || '이름 없음'),
   });
-  picker.setPlaylists(PLAYLISTS);
+  picker.setPlaylists(PLAYLISTS, { trackKey: TRACKS[0].key }); // 이미 담긴 플레이리스트는 "✓ 담김"
   return picker;
 }
 
-// 모달
+// 모달 (고르면 실제처럼 모달이 닫히고 가운데 확인 표시)
 function setupModalDemo() {
   $('sg-modal-picker')?.addEventListener('click', () => {
     let modal = null;
-    const picker = fakePicker((message) => {
+    const picker = fakePicker((name) => {
       modal?.close();
-      showToast(message, { type: 'success' });
+      showAddedHud({ name: `(예시) ${name}` });
     });
     modal = openModal({ title: '플레이리스트에 추가', body: picker.el });
   });
@@ -219,8 +228,16 @@ function setupModalDemo() {
 // 플레이리스트 카드와 펼쳐 놓은 선택 화면
 function renderPlaylistDemo() {
   $('sg-playlist-cards').replaceChildren(...PLAYLISTS.map(renderPlaylistCard));
-  const picker = fakePicker((message) => showToast(message, { type: 'success' }));
+  const picker = fakePicker((name) => showAddedHud({ name: `(예시) ${name}` }));
   $('sg-picker').replaceChildren(picker.el);
+}
+
+// "플레이리스트에 추가됨" 표시: 띄우기 버튼 + 고정 예시
+function renderHudDemo() {
+  $('sg-hud-show')?.addEventListener('click', () => showAddedHud({ name: '비 오는 날 듣는 곡' }));
+  const sample = cloneTemplate('added-hud');
+  setText(sample, 'added-hud-name', '"비 오는 날 듣는 곡"');
+  $('sg-hud-sample')?.replaceChildren(sample);
 }
 
 // 페이지 시작 (Firebase를 불러오지 않음)
@@ -234,6 +251,7 @@ async function main() {
   renderToastDemo();
   setupModalDemo();
   renderPlaylistDemo();
+  renderHudDemo();
 }
 
 main().catch((error) => console.error('[styleguide] 초기화 실패', error));

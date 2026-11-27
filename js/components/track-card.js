@@ -7,7 +7,7 @@
 // =====================================================================
 
 import { cloneTemplate } from './templates.js';
-import { $, setText, setLink, setImage } from '../utils/dom.js';
+import { $, setText, setLink, setImage, setState } from '../utils/dom.js';
 
 const DEFAULT_ALBUM_IMAGE = 'assets/default-album.svg';
 
@@ -48,6 +48,20 @@ export function renderTrackCard(track, { onAdd, onRemove, meta } = {}) {
   bindButton(card, 'card-remove', onRemove, track, `${track.title} 목록에서 빼기`);
 
   return card;
+}
+
+// "플레이리스트에 추가" 버튼을 "✓ 추가됨"으로 바꾸기 (added=false면 원래대로)
+// 버튼은 계속 눌러서 다른 플레이리스트에도 담을 수 있음. 원래 문구는 템플릿의 것을 그대로 기억해 둠
+const addButtonText = new WeakMap();
+export function setCardAdded(card, track, added) {
+  const button = $('card-add', card);
+  if (!button) return;
+  if (!addButtonText.has(button)) addButtonText.set(button, button.textContent);
+  setState(button, 'is-added', Boolean(added));
+  button.textContent = added ? '✓ 추가됨' : addButtonText.get(button);
+  button.setAttribute('aria-label', added
+    ? `${track.title} 플레이리스트에 추가됨 (다른 플레이리스트에도 추가)`
+    : `${track.title} 플레이리스트에 추가`);
 }
 
 // 카드 안의 별점 자리 찾기

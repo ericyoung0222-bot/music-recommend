@@ -16,7 +16,9 @@ import { showToast } from '../components/toast.js';
 // ?v=: 폰 브라우저가 고치기 전 파일을 캐시에서 계속 쓰지 않도록 (바꿀 때마다 숫자 갱신)
 import { renderSuggestion, bindSuggestionList } from '../components/suggestion.js?v=20261123c';
 import { renderChip } from '../components/chip.js';
-import { renderTrackCard, getRatingSlot } from '../components/track-card.js';
+// ?v=: 새 기능(setCardAdded)을 쓰므로 폰에 남은 옛 파일 대신 새 파일을 받게 함
+import { renderTrackCard, getRatingSlot, setCardAdded } from '../components/track-card.js?v=20261127a';
+import { makeTrackKey } from '../utils/track-key.js';
 
 const MIN_SEEDS = 3;
 const MAX_SEEDS = 5;
@@ -347,11 +349,12 @@ async function getMyRatings(user, account) {
 }
 
 // 추천 카드의 "플레이리스트에 추가" → 플레이리스트 선택 모달
-function handleAddToPlaylist(track) {
+function handleAddToPlaylist(track, _button, card) {
   loadAccount()
     .then((account) => {
       if (!account) throw new Error('로그인 기능을 불러오지 못했어요');
-      return account.openAddToPlaylistModal(track);
+      // 담기에 성공하면 카드 버튼을 "✓ 추가됨"으로 (확인 표시는 모달 쪽에서 띄움)
+      return account.openAddToPlaylistModal(track, { onAdded: () => setCardAdded(card, track, true) });
     })
     .catch((error) => {
       console.error('[recommend] 플레이리스트 모달 오류', error);
@@ -370,6 +373,20 @@ function renderResults(tracks, { user, myRatings, account }) {
     return card;
   });
   el.resultsList.replaceChildren(...cards);
+  if (user && account) markAlreadyAdded(tracks, cards, { user, account });
+}
+
+// 이미 내 플레이리스트 어딘가에 담긴 곡은 처음부터 "✓ 추가됨"으로 표시 (못 불러와도 추천 화면은 그대로)
+async function markAlreadyAdded(tracks, cards, { user, account }) {
+  try {
+    const playlists = await account.listPlaylists(user.uid);
+    const added = new Set(playlists.flatMap((p) => (p.tracks || []).map((t) => t?.key)));
+    tracks.forEach((track, i) => {
+      if (cards[i].isConnected && added.has(makeTrackKey(track.artist, track.title))) setCardAdded(cards[i], track, true);
+    });
+  } catch (error) {
+    console.warn('[recommend] 담긴 곡 표시를 못 했어요', error);
+  }
 }
 
 // 추천 실행

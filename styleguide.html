@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="css/pages/ratings.css">
   <link rel="stylesheet" href="css/pages/styleguide.css">
   <script src="js/boot.js"></script>
-  <script type="module" src="js/pages/styleguide-page.js"></script>
+  <script type="module" src="js/pages/styleguide-page.js?v=20261127a"></script>
 </head>
 <body data-page="styleguide">
   <a class="skip-link" href="#main">본문으로 건너뛰기</a>
@@ -203,7 +203,7 @@
     <!-- ===================== 곡 카드 ===================== -->
     <section class="sg-section" id="sg-cards">
       <h2 class="sg-section__title">곡 카드</h2>
-      <p class="sg-note">왼쪽부터: 추천 결과 카드 / 앨범 이미지 없음(기본 이미지) / 플레이리스트 상세 카드(빼기 버튼, 추가한 날짜) / 아주 긴 제목</p>
+      <p class="sg-note">왼쪽부터: 추천 결과 카드 / 앨범 이미지 없음(기본 이미지) + 이미 담은 곡("✓ 추가됨", is-added) / 플레이리스트 상세 카드(빼기 버튼, 추가한 날짜) / 아주 긴 제목. "플레이리스트에 추가"를 누르면 가운데 확인 표시가 떠요.</p>
       <ul class="card-grid" data-js="sg-cards"></ul>
     </section>
 
@@ -235,6 +235,16 @@
         <button class="btn btn--secondary btn--small" type="button" data-js="sg-toast-link">링크 포함</button>
       </div>
       <div class="sg-demo sg-stack sg-toast-samples" data-js="sg-toast-samples"></div>
+    </section>
+
+    <!-- ===================== 추가됨 표시 ===================== -->
+    <section class="sg-section" id="sg-hud">
+      <h2 class="sg-section__title">"플레이리스트에 추가됨" 표시 (애플 뮤직 스타일)</h2>
+      <p class="sg-note">플레이리스트에 담으면 화면 가운데에 1.6초 동안 떴다 사라져요. 사라질 때 is-leaving이 붙어요. 아래는 고정 예시예요.</p>
+      <div class="sg-demo sg-row">
+        <button class="btn btn--primary btn--small" type="button" data-js="sg-hud-show">확인 표시 띄우기</button>
+      </div>
+      <div class="sg-demo" data-js="sg-hud-sample"></div>
     </section>
 
     <!-- ===================== 모달 ===================== -->

@@ -4,7 +4,7 @@
 // =====================================================================
 
 import { cloneTemplate } from './templates.js';
-import { $, $$, setText, setDisabled, setBusy } from '../utils/dom.js';
+import { $, $$, setText, setDisabled, setBusy, setState } from '../utils/dom.js';
 import { showStatus, clearStatus } from './status.js';
 
 // 선택 화면 만들기
@@ -26,13 +26,30 @@ export function renderPlaylistPicker({ trackLabel, onSelect, onCreate } = {}) {
   });
 
   // 목록 그리기
-  function setPlaylists(playlists) {
+  // trackKey: 담으려는 곡의 키. 이미 그 곡이 들어 있는 플레이리스트는 "✓ 담김"으로 표시하고 누르면 안내만
+  function setPlaylists(playlists, { trackKey = '' } = {}) {
     clearStatus(statusSlot);
     const items = playlists.map((playlist) => {
       const item = cloneTemplate('playlist-picker-item');
+      const count = playlist.tracks?.length ?? 0;
+      const added = Boolean(trackKey) && (playlist.tracks || []).some((t) => t?.key === trackKey);
       setText(item, 'picker-name', playlist.name);
-      setText(item, 'picker-count', `${playlist.tracks?.length ?? 0}곡`);
-      $('picker-option', item)?.addEventListener('click', () => onSelect?.(playlist));
+      setText(item, 'picker-count', added ? `✓ 담김 · ${count}곡` : `${count}곡`);
+      const option = $('picker-option', item);
+      if (option) {
+        setState(option, 'is-added', added);
+        if (added) {
+          option.setAttribute('aria-disabled', 'true');
+          option.setAttribute('aria-label', `${playlist.name}, 이미 담긴 곡`);
+        }
+        option.addEventListener('click', () => {
+          if (added) {
+            showStatus(statusSlot, { type: 'empty', message: `이미 "${playlist.name}"에 담긴 곡이에요.` });
+            return;
+          }
+          onSelect?.(playlist);
+        });
+      }
       return item;
     });
     list.replaceChildren(...items);

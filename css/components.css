@@ -831,9 +831,108 @@
   gap: var(--space-2);
 }
 
+/* =============== "플레이리스트에 추가됨" 표시 (애플 뮤직 스타일) ===============
+   담으면 화면 가운데에 잠깐 떴다 사라지는 확인 상자, 담은 곡의 버튼, 이미 담긴 플레이리스트 표시.
+   기본 모양만 정해 두었으니 디자인 담당이 자유롭게 바꿔도 됩니다.
+   (기능용: .hud-region의 position: fixed와 pointer-events: none은 남겨 주세요 — 화면을 막지 않게) */
+.hud-region {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: var(--space-6);
+  pointer-events: none;
+}
+
+.added-hud {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 168px;
+  max-width: 280px;
+  padding: var(--space-5) var(--space-6);
+  border-radius: var(--radius-lg);
+  background: rgba(29, 31, 39, 0.86); /* color-mix를 모르는 옛 브라우저(iOS 16.1 이하 등)용 */
+  background: color-mix(in srgb, var(--color-text) 82%, transparent);
+  color: var(--color-surface);
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  animation: hud-in 0.22s ease-out;
+}
+
+.added-hud.is-leaving {
+  animation: hud-out 0.25s ease-in forwards;
+}
+
+.added-hud__icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border: 3px solid currentColor;
+  border-radius: 50%;
+  font-size: 1.75rem;
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+
+.added-hud__title {
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+}
+
+.added-hud__name {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  opacity: 0.85;
+  word-break: break-word;
+}
+
+/* 담은 곡의 "✓ 추가됨" 버튼 (눌러서 다른 플레이리스트에도 담을 수 있음) */
+.btn.is-added,
+.btn.is-added:hover {
+  background: var(--color-success-soft);
+  color: var(--color-success-strong);
+}
+
+/* 이미 이 곡이 담긴 플레이리스트 */
+.picker__button.is-added,
+.picker__button.is-added:hover {
+  border-color: var(--color-border);
+  background: var(--color-surface-alt);
+  cursor: default;
+}
+
+.picker__button.is-added .picker__count {
+  color: var(--color-success-strong);
+  font-weight: var(--font-weight-bold);
+}
+
 /* =============== 공용 애니메이션 =============== */
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes hud-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes hud-out {
+  to {
+    opacity: 0;
+    transform: scale(0.95);
   }
 }

@@ -9,3 +9,4 @@ export { isAuthAvailable, getCurrentUser } from './auth.js';
 export { getLowRatedKeys, getMyRatingsMap } from './rating.js';
 export { mountTrackRating } from './rating-ui.js';
 export { openAddToPlaylistModal } from './playlist-modal.js';
+export { listPlaylists } from './playlist.js';

@@ -132,7 +132,18 @@
   </div>
 </template>
 
-<!-- 위 모달 안의 플레이리스트 한 줄 -->
+<!-- 플레이리스트에 담은 뒤 화면 가운데에 잠깐 떴다 사라지는 확인 표시 (애플 뮤직 스타일)
+     - 사라질 때 JS가 is-leaving을 붙입니다. 아이콘·문구·모양은 자유롭게 바꿔도 돼요. -->
+<template data-template="added-hud">
+  <div class="added-hud" data-js="added-hud">
+    <span class="added-hud__icon" aria-hidden="true">✓</span>
+    <p class="added-hud__title" data-js="added-hud-title">플레이리스트에 추가됨</p>
+    <p class="added-hud__name" data-js="added-hud-name"></p>
+  </div>
+</template>
+
+<!-- 위 모달 안의 플레이리스트 한 줄
+     - 이미 이 곡이 담긴 플레이리스트에는 JS가 is-added를 붙이고 개수 자리에 "✓ 담김"을 씁니다. -->
 <template data-template="playlist-picker-item">
   <li class="picker__item">
     <button class="picker__button" type="button" data-js="picker-option">

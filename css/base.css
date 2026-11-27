@@ -24,6 +24,7 @@
   --color-danger-soft: #fdeaea;
   --color-success: #1f9d55;         /* 성공 */
   --color-success-soft: #e3f6eb;
+  --color-success-strong: #157a41;  /* 성공 글자 (밝은 배경 위에서도 잘 읽히게: 대비 4.5:1 이상) */
   --color-focus: #ff8a00;           /* 키보드 포커스 테두리 */
   --color-overlay: rgba(20, 22, 30, 0.5); /* 모달 뒤 어두운 배경 */
 

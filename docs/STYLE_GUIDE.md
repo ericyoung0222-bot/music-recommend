@@ -13,7 +13,7 @@
 |---|---|
 | ① `data-` 속성은 건드리지 않기 | `data-js`, `data-page`, `data-template`, `data-score`는 기능이 요소를 찾는 이름표입니다. 지우거나 바꾸면 기능이 멈춥니다. |
 | ② 디자인은 class로만 | class 이름은 자유롭게 바꾸거나 추가해도 됩니다. 기능은 class를 보지 않습니다. |
-| ③ 상태 클래스 이름은 그대로 | `is-loading`, `is-empty`, `is-error`, `is-active`, `is-selected`, `is-disabled`, `is-logged-in`, `is-success`는 JS가 붙였다 뗐다 합니다. **이름은 그대로 두고 모양만** 정하세요. |
+| ③ 상태 클래스 이름은 그대로 | `is-loading`, `is-empty`, `is-error`, `is-active`, `is-selected`, `is-disabled`, `is-logged-in`, `is-success`, `is-added`, `is-leaving`은 JS가 붙였다 뗐다 합니다. **이름은 그대로 두고 모양만** 정하세요. |
 | ④ 색·글꼴·간격은 변수로만 | `#4a4ae0` 같은 값은 `css/base.css`의 변수에만 쓰고, 다른 CSS에서는 `var(--color-primary)`처럼 변수만 씁니다. |
 
 > `js/` 폴더는 열지 않아도 됩니다. 수정하면 안 됩니다.
@@ -93,6 +93,8 @@ JS가 붙였다 뗐다 하는 클래스입니다. 이름은 바꾸지 말고 모
 | `is-selected` | `.star-rating__star` | 내 점수 이하의 채워진 별 |
 | `is-disabled` | `.btn`, `.input`, `.picker__button`, `.star-rating` | 지금은 누를 수 없음 |
 | `is-logged-in` | `<body>` | 로그인한 상태 (페이지 전체 모양을 바꾸고 싶을 때) |
+| `is-added` | `.btn`(곡 카드의 "✓ 추가됨"), `.picker__button`(이미 이 곡이 담긴 플레이리스트) | 플레이리스트에 담은 곡 |
+| `is-leaving` | `.added-hud` | "플레이리스트에 추가됨" 확인 표시가 사라지는 중 (0.25초 뒤 지워짐) |
 
 > `hidden` 속성이 붙은 요소는 CSS와 상관없이 항상 숨겨집니다. (예: 로그아웃 상태의 프로필 메뉴)
 
@@ -298,7 +300,7 @@ JS로 그려지는 컴포넌트는 모두 `partials/templates.html`에 원본이
   <div class="status-slot status-slot--compact" data-js="picker-status"></div>
   <ul class="picker__list" data-js="picker-list">
     <li class="picker__item">
-      <button class="picker__button" data-js="picker-option">          ← 저장 중 is-disabled
+      <button class="picker__button" data-js="picker-option">          ← 저장 중 is-disabled, 이미 담긴 플레이리스트 is-added
         <span class="picker__name" data-js="picker-name"></span>
         <span class="picker__count" data-js="picker-count"></span>
       </button>
