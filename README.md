@@ -91,6 +91,12 @@ serve.json          로컬 서버(npx serve) 설정
 node tests/recommend.test.mjs
 ```
 
+디자인 수정(CSS, HTML class·문구)이 기능을 깨뜨리지 않았는지는 계약 검사로 확인합니다. JS가 찾는 `data-js` 이름, 처음에 숨겨 둘 요소의 `hidden`, CSP(인라인 style·script 금지), 기능에 필요한 CSS(`[hidden]`, `.visually-hidden` 등)를 검사합니다. PR과 main push 때 GitHub Actions(`.github/workflows/check.yml`)가 두 테스트를 자동으로 실행합니다.
+
+```powershell
+node tests/contract.test.mjs
+```
+
 곡 구분은 항상 `js/utils/track-key.js`의 `makeTrackKey(artist, title)`로 합니다. (앞뒤 공백 제거 → 연속 공백 하나로 → 소문자 → `가수::곡명` → `encodeURIComponent`)
 
 ## 로컬에서 실행하기

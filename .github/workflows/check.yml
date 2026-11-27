@@ -1,0 +1,26 @@
+# PR을 올리거나 main에 올라올 때 자동 검사
+# - 추천 결과 정리 규칙 테스트
+# - 디자인 ↔ 기능 계약 검사 (data-js 이름, hidden, CSP, 기능용 CSS 등)
+# 실패하면 PR 화면에 빨간 X가 뜹니다. 로그에서 ✘ 줄을 확인하세요. (설명: docs/CONTRIBUTING.md)
+name: check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: 추천 규칙 테스트
+        run: node tests/recommend.test.mjs
+      - name: 디자인 ↔ 기능 계약 검사
+        run: node tests/contract.test.mjs
