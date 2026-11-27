@@ -26,9 +26,22 @@ export function openModal({ title, body, onClose } = {}) {
 
   $('modal-close', dialog)?.addEventListener('click', () => dialog.close());
 
-  // 모달 바깥(어두운 배경)을 누르면 닫기
+  // 모달 바깥(어두운 배경)을 눌렀다 뗐을 때만 닫기
+  // - 상자 안(패딩 포함) 클릭은 무시 → 디자인에서 .modal에 padding을 줘도 안전
+  // - 입력칸에서 드래그하다 바깥에서 손을 떼도 닫히지 않음 (입력한 내용 보호)
+  // - 여는 버튼을 더블클릭해서 두 번째 클릭이 배경에 떨어져도 닫히지 않음
+  const isOnBackdrop = (event) => {
+    if (event.target !== dialog) return false;
+    const box = dialog.getBoundingClientRect();
+    return event.clientX < box.left || event.clientX > box.right
+      || event.clientY < box.top || event.clientY > box.bottom;
+  };
+  let pressedOnBackdrop = false;
+  dialog.addEventListener('pointerdown', (event) => { pressedOnBackdrop = isOnBackdrop(event); });
   dialog.addEventListener('click', (event) => {
-    if (event.target === dialog) dialog.close();
+    const close = pressedOnBackdrop && isOnBackdrop(event) && event.detail < 2;
+    pressedOnBackdrop = false;
+    if (close) dialog.close();
   });
 
   // 닫히면 화면에서 지우고 원래 위치로 포커스 복귀

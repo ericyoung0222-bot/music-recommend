@@ -172,10 +172,12 @@ function renderToastDemo() {
     if (type) toast.classList.add(`is-${type}`);
     setText(toast, 'toast-message', message);
     const linkEl = $('toast-link', toast);
-    if (link && linkEl) {
-      linkEl.textContent = link;
-      linkEl.href = '#sg-toast';
-      linkEl.hidden = false;
+    if (linkEl) {
+      linkEl.hidden = !link;
+      if (link) {
+        linkEl.textContent = link;
+        linkEl.href = '#sg-toast';
+      }
     }
     return toast;
   });

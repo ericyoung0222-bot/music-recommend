@@ -22,11 +22,15 @@ export function showToast(message, { type, linkText, linkHref, duration } = {}) 
   if (type === 'error') el.setAttribute('role', 'alert');
   setText(el, 'toast-message', message);
 
+  // 링크는 있을 때만 보이고, 아니면 숨김 (템플릿의 hidden이 빠져도 빈 링크가 보이지 않게)
   const link = $('toast-link', el);
-  if (link && linkText && linkHref) {
-    link.textContent = linkText;
-    link.href = linkHref;
-    link.hidden = false;
+  if (link) {
+    const hasLink = Boolean(linkText && linkHref);
+    link.hidden = !hasLink;
+    if (hasLink) {
+      link.textContent = linkText;
+      link.href = linkHref;
+    }
   }
 
   const remove = () => el.remove();
@@ -38,6 +42,17 @@ export function showToast(message, { type, linkText, linkHref, duration } = {}) 
 
   // 링크가 있으면 누를 시간을 더 줌
   const time = duration ?? (linkText ? 7000 : 4000);
-  window.setTimeout(remove, time);
+  let timer = window.setTimeout(remove, time);
+  // 키보드로 들어가 있거나 마우스를 올려 둔 동안은 사라지지 않게 (링크를 누르기 전에 사라져 포커스를 잃지 않도록)
+  const pause = () => window.clearTimeout(timer);
+  const resume = () => {
+    if (el.contains(document.activeElement) || el.matches(':hover')) return;
+    window.clearTimeout(timer);
+    timer = window.setTimeout(remove, 3000);
+  };
+  el.addEventListener('focusin', pause);
+  el.addEventListener('focusout', (event) => { if (!el.contains(event.relatedTarget)) resume(); });
+  el.addEventListener('mouseenter', pause);
+  el.addEventListener('mouseleave', resume);
   return el;
 }

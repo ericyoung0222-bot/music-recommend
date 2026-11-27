@@ -5,7 +5,7 @@
 // =====================================================================
 
 import {
-  db, collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc,
+  db, collection, doc, getDoc, getDocs, addDoc, deleteDoc,
   query, orderBy, serverTimestamp, Timestamp, runTransaction,
 } from './firebase.js';
 import { makeTrackKey } from './utils/track-key.js';
@@ -64,12 +64,14 @@ function fromSnapshot(snapshot) {
 // 저장할 곡 정보 만들기 (필드 길이 제한, 곡 키는 항상 makeTrackKey로)
 function toStoredTrack(track) {
   const cut = (value) => String(value ?? '').slice(0, MAX_FIELD_LENGTH);
+  // 주소는 자르면 깨진 링크가 되므로, 너무 길면 비워 둠 (카드에서 Last.fm 링크만 숨겨지고 YouTube 검색은 그대로)
+  const fit = (value) => { const text = String(value ?? ''); return text.length <= MAX_FIELD_LENGTH ? text : ''; };
   return {
     key: makeTrackKey(track.artist, track.title),
     title: cut(track.title),
     artist: cut(track.artist),
-    image: cut(track.image),
-    url: cut(track.url),
+    image: fit(track.image),
+    url: fit(track.url),
     addedAt: Timestamp.now(), // 배열 안에는 serverTimestamp를 쓸 수 없어서 현재 시각 사용
   };
 }
@@ -77,6 +79,10 @@ function toStoredTrack(track) {
 // 내 플레이리스트 목록 (최근 수정 순)
 export async function listPlaylists(uid) {
   const snapshot = await getDocs(query(playlistsRef(uid), orderBy('updatedAt', 'desc')));
+  // 서버에 못 닿아 빈 캐시가 돌아온 경우: "플레이리스트 없음" 대신 오류로 처리 (다시 시도 버튼이 보이게)
+  if (snapshot.empty && snapshot.metadata.fromCache) {
+    throw Object.assign(new Error('offline'), { code: 'unavailable' });
+  }
   return snapshot.docs.map(fromSnapshot);
 }
 
@@ -112,7 +118,13 @@ export async function createPlaylistWithTrack(uid, name, track) {
 // 이름 바꾸기
 export async function renamePlaylist(uid, playlistId, name) {
   const clean = normalizeName(name);
-  await updateDoc(playlistRef(uid, playlistId), { name: clean, updatedAt: serverTimestamp() });
+  const ref = playlistRef(uid, playlistId);
+  // 다른 탭·기기에서 이미 삭제된 경우 "권한 없음" 대신 "찾을 수 없음"으로 알리기 위해 먼저 확인
+  await runTransaction(db, async (transaction) => {
+    const snapshot = await transaction.get(ref);
+    if (!snapshot.exists()) throw new PlaylistError('플레이리스트를 찾을 수 없어요.', 'not-found');
+    transaction.update(ref, { name: clean, updatedAt: serverTimestamp() });
+  });
   return clean;
 }
 

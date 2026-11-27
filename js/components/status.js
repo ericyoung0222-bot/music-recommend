@@ -25,17 +25,22 @@ export function showStatus(slot, { type, message, linkText, linkHref, onRetry } 
 
   setText(el, 'status-message', message);
 
+  // 링크·다시 시도 버튼은 필요할 때만 보이고, 아니면 숨김
+  // (템플릿의 hidden 속성이 디자인 수정 중 빠져도 빈 링크나 눌러도 안 되는 버튼이 보이지 않게)
   const link = $('status-link', el);
-  if (link && linkText && linkHref) {
-    link.textContent = linkText;
-    link.href = linkHref;
-    link.hidden = false;
+  if (link) {
+    const hasLink = Boolean(linkText && linkHref);
+    link.hidden = !hasLink;
+    if (hasLink) {
+      link.textContent = linkText;
+      link.href = linkHref;
+    }
   }
 
   const retry = $('status-retry', el);
-  if (retry && typeof onRetry === 'function') {
-    retry.hidden = false;
-    retry.addEventListener('click', onRetry);
+  if (retry) {
+    retry.hidden = typeof onRetry !== 'function';
+    if (!retry.hidden) retry.addEventListener('click', onRetry);
   }
 
   slot.append(el);

@@ -43,7 +43,10 @@ export async function openAddToPlaylistModal(track) {
       await task();
     } catch (error) {
       console.error('[playlist-modal] 저장 실패', error);
-      picker.setStatus('error', getPlaylistErrorMessage(error));
+      const message = getPlaylistErrorMessage(error);
+      // 저장 중에 모달을 닫았으면 화면에 남아 있는 토스트로 알림 (조용히 실패하지 않게)
+      if (modal?.dialog.isConnected) picker.setStatus('error', message);
+      else showToast(message, { type: 'error' });
     } finally {
       busy = false;
       picker.setBusy(false);

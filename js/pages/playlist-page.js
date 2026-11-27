@@ -101,17 +101,40 @@ async function loadPlaylist() {
 // 곡 빼기
 async function handleRemoveTrack(track, button) {
   setBusy(button, true);
+  const index = state.playlist.tracks.findIndex((t) => t.key === track.key);
   try {
     state.playlist.tracks = await removeTrackFromPlaylist(state.user.uid, state.playlistId, track.key);
     state.playlist.updatedAt = new Date();
     renderHeader();
     renderTracks();
+    focusAfterRemove(index);
     showToast(`"${track.title}"을(를) 뺐어요`);
   } catch (error) {
     console.error('[playlist] 곡 빼기 실패', error);
+    if (handleMissingPlaylist(error)) return;
     showToast(getPlaylistErrorMessage(error), { type: 'error' });
     setBusy(button, false);
   }
+}
+
+// 곡을 뺀 뒤 키보드 포커스를 같은 자리의 다음 곡 "빼기" 버튼으로 (없으면 목록 안내로)
+function focusAfterRemove(index) {
+  const cards = el.list.children;
+  const next = cards[Math.min(Math.max(index, 0), cards.length - 1)];
+  const target = next && $('card-remove', next);
+  if (target) {
+    target.focus();
+    return;
+  }
+  el.tracksStatus.tabIndex = -1;
+  el.tracksStatus.focus();
+}
+
+// 다른 탭·기기에서 이미 삭제된 플레이리스트면 "찾을 수 없음" 화면으로 바꿈
+function handleMissingPlaylist(error) {
+  if (error?.code !== 'not-found') return false;
+  loadPlaylist();
+  return true;
 }
 
 // 이름 바꾸기 폼 열기/닫기
@@ -139,6 +162,7 @@ async function handleRename(event) {
     showToast('이름을 바꿨어요', { type: 'success' });
   } catch (error) {
     console.error('[playlist] 이름 바꾸기 실패', error);
+    if (handleMissingPlaylist(error)) return;
     showToast(getPlaylistErrorMessage(error), { type: 'error' });
   } finally {
     setBusy(el.renameSubmit, false);

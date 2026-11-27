@@ -71,7 +71,7 @@ export function mountTrackRating(slot, track, { user = null, myScore = null, onC
     } catch (error) {
       console.error('[rating] 삭제 실패', error);
       rating.setMyScore(previous);
-      showToast(getRatingErrorMessage(error), { type: 'error' });
+      showToast(getRatingErrorMessage(error, '삭제'), { type: 'error' });
     } finally {
       rating.setDisabled(false);
     }

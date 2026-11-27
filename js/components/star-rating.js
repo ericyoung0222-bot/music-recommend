@@ -25,6 +25,9 @@ export function createStarRating({
   const stars = $$('star', el);
   const clearButton = $('star-clear', el);
   const api = { el, myScore: null };
+  // 저장 중 여부: 버튼을 disabled로 만들면 키보드 포커스가 사라지므로,
+  // aria-disabled + 이 값으로 클릭만 무시함 (포커스는 누른 별에 그대로)
+  let busy = false;
 
   $('star-group', el)?.setAttribute('aria-label', `${trackTitle} 별점 주기`);
   clearButton?.setAttribute('aria-label', `${trackTitle} 내 평점 삭제`);
@@ -33,12 +36,12 @@ export function createStarRating({
   stars.forEach((star, index) => {
     const score = Number(star.dataset.score);
     star.setAttribute('aria-label', `${score}점`);
-    star.addEventListener('click', () => onRate?.(score));
+    star.addEventListener('click', () => { if (!busy) onRate?.(score); });
     star.addEventListener('pointerenter', () => previewTo(score));
     star.addEventListener('keydown', (event) => moveFocus(event, index));
   });
   $('star-group', el)?.addEventListener('pointerleave', () => previewTo(0));
-  clearButton?.addEventListener('click', () => onClear?.());
+  clearButton?.addEventListener('click', () => { if (!busy) onClear?.(); });
 
   // 마우스를 올린 별까지 is-active (미리 보기)
   function previewTo(score) {
@@ -70,7 +73,12 @@ export function createStarRating({
       star.setAttribute('aria-pressed', String(value === api.myScore));
     });
     setText(el, 'star-mine', api.myScore ? `내 점수 ${api.myScore}점` : '');
-    if (clearButton) clearButton.hidden = !api.myScore;
+    if (clearButton) {
+      const hadFocus = clearButton === document.activeElement;
+      clearButton.hidden = !api.myScore;
+      // 누른 "평점 삭제" 버튼이 숨겨지면 포커스를 첫 별로 옮김 (키보드 사용자가 위치를 잃지 않게)
+      if (hadFocus && clearButton.hidden) stars[0]?.focus();
+    }
   };
 
   // 평균/인원 표시 (stats가 null이면 불러오기 실패)
@@ -90,10 +98,11 @@ export function createStarRating({
 
   // 저장 중에는 못 누르게
   api.setDisabled = (disabled) => {
-    setState(el, 'is-disabled', disabled);
-    el.setAttribute('aria-busy', String(Boolean(disabled)));
-    stars.forEach((star) => { star.disabled = Boolean(disabled); });
-    if (clearButton) clearButton.disabled = Boolean(disabled);
+    busy = Boolean(disabled);
+    setState(el, 'is-disabled', busy);
+    el.setAttribute('aria-busy', String(busy));
+    stars.forEach((star) => star.setAttribute('aria-disabled', String(busy)));
+    clearButton?.setAttribute('aria-disabled', String(busy));
   };
 
   api.setMyScore(myScore);

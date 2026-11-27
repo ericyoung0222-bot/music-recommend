@@ -14,7 +14,7 @@ import { showStatus, clearStatus } from '../components/status.js';
 import { renderTrackCard, getRatingSlot } from '../components/track-card.js';
 
 const el = {};
-const state = { user: null, ratings: [], sort: 'recent' };
+const state = { user: null, ratings: [], sort: 'recent', loaded: false };
 
 // 정렬된 복사본 만들기 (점수순은 점수가 같으면 최신순)
 function sortRatings(list, sort) {
@@ -44,13 +44,23 @@ function showEmpty() {
 function handleChange(rating, card, score) {
   if (score === null) {
     state.ratings = state.ratings.filter((r) => r.key !== rating.key);
+    // 저장하는 사이 정렬을 바꿔 카드가 새로 그려졌다면, 지금 목록으로 다시 그림 (지운 곡이 남아 보이지 않게)
+    if (!card.isConnected) {
+      renderList();
+      return;
+    }
+    // 지워지는 카드에 포커스가 있었다면 옆 카드의 별(없으면 정렬 칸)로 옮김
+    const hadFocus = card.contains(document.activeElement);
+    const next = card.nextElementSibling || card.previousElementSibling;
     card.remove();
+    if (hadFocus) ((next && $('star', next)) || el.sort)?.focus();
     renderCount();
     if (!state.ratings.length) showEmpty();
     return;
   }
   rating.score = score;
   rating.updatedAt = new Date();
+  if (!card.isConnected) renderList(); // 위와 같은 이유 (새 카드가 옛 점수를 보이지 않게)
 }
 
 // 목록 그리기
@@ -77,10 +87,12 @@ function renderList() {
 
 // 불러오기
 async function loadRatings() {
+  state.loaded = false;
   el.list.replaceChildren();
   showStatus(el.status, { type: 'loading', message: '내 평점을 불러오는 중이에요…' });
   try {
     state.ratings = await listMyRatings(state.user.uid);
+    state.loaded = true;
     renderList();
   } catch (error) {
     console.error('[ratings] 불러오기 실패', error);
@@ -104,7 +116,8 @@ async function main() {
 
   el.sort.addEventListener('change', () => {
     state.sort = el.sort.value === 'score' ? 'score' : 'recent';
-    renderList();
+    // 불러오는 중이거나 실패한 상태면 다시 그리지 않음 (오류·다시 시도가 "평가한 곡 없음"으로 덮이지 않게)
+    if (state.loaded) renderList();
   });
 
   await loadRatings();

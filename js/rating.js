@@ -25,11 +25,19 @@ export function isValidScore(score) {
   return Number.isInteger(score) && score >= 1 && score <= 5;
 }
 
-// 에러를 사용자에게 보여줄 문장으로
-export function getRatingErrorMessage(error) {
+// 에러를 사용자에게 보여줄 문장으로 (action: '저장' 또는 '삭제')
+export function getRatingErrorMessage(error, action = '저장') {
   if (error?.code === 'permission-denied') return '권한이 없어요. 로그아웃 후 다시 로그인해 주세요.';
   if (error?.code === 'unavailable') return '인터넷 연결을 확인하고 다시 시도해 주세요.';
-  return '평점을 저장하지 못했어요. 잠시 후 다시 시도해 주세요.';
+  return `평점을 ${action}하지 못했어요. 잠시 후 다시 시도해 주세요.`;
+}
+
+// 인터넷이 끊겨 있으면 바로 실패로 처리
+// (오프라인에서 Firestore 쓰기는 끝나지 않고 기다리기만 해서 별이 계속 잠겨 있게 됨)
+function assertOnline() {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    throw Object.assign(new Error('offline'), { code: 'unavailable' });
+  }
 }
 
 // 문서 위치
@@ -43,17 +51,20 @@ function trackRatingRef(trackKey, uid) {
 // 평점 저장 (새로 주기 + 수정 모두)
 export async function saveRating(uid, track, score) {
   if (!isValidScore(score)) throw new Error('점수는 1~5 정수여야 해요');
+  assertOnline();
   // 이미 만들어 둔 곡 키가 있으면 그대로 (저장된 제목이 200자로 잘린 경우에도 같은 문서를 가리키도록)
   const key = track.key || makeTrackKey(track.artist, track.title);
   const cut = (value) => String(value ?? '').slice(0, MAX_FIELD_LENGTH);
+  // 주소는 자르면 깨진 링크가 되므로, 너무 길면 비워 둠
+  const fit = (value) => { const text = String(value ?? ''); return text.length <= MAX_FIELD_LENGTH ? text : ''; };
 
   const batch = writeBatch(db);
   batch.set(myRatingRef(uid, key), {
     score,
     title: cut(track.title),
     artist: cut(track.artist),
-    image: cut(track.image),
-    url: cut(track.url),
+    image: fit(track.image),
+    url: fit(track.url),
     updatedAt: serverTimestamp(),
   });
   batch.set(trackRatingRef(key, uid), { score, updatedAt: serverTimestamp() });
@@ -67,6 +78,7 @@ export async function saveRating(uid, track, score) {
 
 // 평점 삭제 (두 곳 함께)
 export async function deleteRating(uid, trackKey) {
+  assertOnline();
   const batch = writeBatch(db);
   batch.delete(myRatingRef(uid, trackKey));
   batch.delete(trackRatingRef(trackKey, uid));
@@ -80,6 +92,8 @@ export async function deleteRating(uid, trackKey) {
 // 내가 평가한 곡 전체 (최근 평가 순)
 export async function listMyRatings(uid) {
   const snapshot = await getDocs(query(collection(db, 'users', uid, 'ratings'), orderBy('updatedAt', 'desc')));
+  // 서버에 못 닿아 빈 캐시가 돌아온 경우: "평가한 곡 없음" 대신 오류로 처리 (다시 시도 버튼이 보이게)
+  if (snapshot.metadata.fromCache) throw Object.assign(new Error('offline'), { code: 'unavailable' });
   return snapshot.docs.map((d) => {
     const data = d.data();
     return {
